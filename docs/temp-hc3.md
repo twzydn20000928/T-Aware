@@ -94,6 +94,9 @@ target. AI temperatures are not required as detector inputs during inference.
 python scripts/download_assets.py --assets temp-hc3 --output /path/to/t-aware-data
 ```
 
+The downloader uses only the Python standard library. Using Temp-HC3 as a dataset
+does not require PyTorch, a model-hosting account, or a GPU.
+
 ```text
 t-aware-data/
 ├── dataset/

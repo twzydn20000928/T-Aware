@@ -100,6 +100,8 @@ python scripts/download_assets.py --assets all --output /path/to/t-aware-data
 Select `t-aware`, `classification-only`, or `robustness-benchmark` to fetch only
 those resources. Rerunning the same command resumes interrupted downloads and
 reuses matching files. `--download-only` retains the archives without extracting.
+Dataset-only users can run this standard-library downloader without installing
+the detector's PyTorch dependencies.
 
 ## Installation
 
