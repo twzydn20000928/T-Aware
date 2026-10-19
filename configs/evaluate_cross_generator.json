@@ -5,7 +5,9 @@
   "models": [
     {
       "name": "t_aware",
-      "checkpoint": "saved_models_epoch50/best_defense_model_FINAL_TESTED.pt"
+      "checkpoint": "saved_models_epoch50/best_defense_model_FINAL_TESTED.pt",
+      "model_config": "roberta-base/config.json",
+      "tokenizer": "roberta-base"
     }
   ],
   "datasets": [

@@ -1,6 +1,23 @@
 # Checkpoints and inference
 
-Detector weights are not bundled with the source checkout and are not currently hosted for public download in this repository. You can obtain a compatible checkpoint by training with the provided configurations.
+The [v0.1.0 release](https://github.com/twzydn20000928/T-Aware/releases/tag/v0.1.0) includes the trained T-Aware detector (lambda=10) and its classification-only ablation (lambda=0). Each download includes the corresponding RoBERTa-base configuration and tokenizer.
+
+| Model | Direct download |
+| --- | --- |
+| T-Aware | [t-aware-roberta-base-v0.1.0.tar.gz](https://github.com/twzydn20000928/T-Aware/releases/download/v0.1.0/t-aware-roberta-base-v0.1.0.tar.gz) |
+| Classification only | [t-aware-classification-only-v0.1.0.tar.gz](https://github.com/twzydn20000928/T-Aware/releases/download/v0.1.0/t-aware-classification-only-v0.1.0.tar.gz) |
+
+```bash
+python scripts/download_assets.py --assets t-aware --output /path/to/t-aware-data
+export T_AWARE_DATA_ROOT=/path/to/t-aware-data
+python examples/detect.py \
+  --checkpoint "$T_AWARE_DATA_ROOT/saved_models_epoch50/best_defense_model_FINAL_TESTED.pt" \
+  --model-config "$T_AWARE_DATA_ROOT/roberta-base" \
+  --tokenizer "$T_AWARE_DATA_ROOT/roberta-base" \
+  --text "A passage to classify." --device cpu
+```
+
+Select `--assets t-aware classification-only` to download both models. The downloader verifies hashes and reuses the shared tokenizer files. You can also train a checkpoint using the configurations below.
 
 ## Training outputs
 

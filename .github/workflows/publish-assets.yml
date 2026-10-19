@@ -1,0 +1,22 @@
+name: Publish research assets
+on:
+  push:
+    branches: [main]
+    paths: ['.github/release-source.json']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publish-research-assets
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.repository == 'twzydn20000928/T-Aware'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify and publish curated research assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/release/publish_assets.py --source-config .github/release-source.json

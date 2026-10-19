@@ -82,12 +82,14 @@ class PipelineTests(unittest.TestCase):
             with self.assertRaises(FileExistsError):
                 evaluate(argparse.Namespace(output=evaluation))
             matrix = {"models": [{"name": "tiny", "checkpoint": str(checkpoint.relative_to(root)),
-                                   "model_config": str((checkpoint.parent / "config.json").relative_to(root))}],
+                                   "model_config": str((checkpoint.parent / "config.json").relative_to(root)),
+                                   "tokenizer": str((output / "tokenizer").relative_to(root))}],
                       "datasets": [{"name": "toy", "path": "attack.jsonl", "protocol": "test", "empty_text": "error"}]}
             matrix_path = root / "matrix.json"
             matrix_path.write_text(json.dumps(matrix))
-            with patch("transformers.AutoTokenizer.from_pretrained", return_value=TinyTokenizer()):
+            with patch("transformers.AutoTokenizer.from_pretrained", return_value=TinyTokenizer()) as tokenizer_loader:
                 benchmark(argparse.Namespace(config=matrix_path, data_root=root, output=root / "benchmark.json", device="cpu"))
+            tokenizer_loader.assert_called_once_with(str(output / "tokenizer"))
             self.assertEqual(len(json.loads((root / "benchmark.json").read_text())["results"]), 1)
 
 

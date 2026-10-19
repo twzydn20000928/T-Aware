@@ -4,7 +4,14 @@ T-Aware reads one JSON object per line. Labels use **0 = human** and **1 = AI**.
 
 ## Availability and directory layout
 
-The Git repository contains code and configurations. Benchmark datasets and detector weights are not currently provided as public downloads in this repository. The commands below describe how to prepare compatible inputs and where existing assets belong.
+The [v0.1.0 release](https://github.com/twzydn20000928/T-Aware/releases/tag/v0.1.0) provides the complete Temp-HC3 dataset and a separate companion robustness benchmark. Temp-HC3 is distributed as one archive containing all generators and all splits; it can be used independently of T-Aware. See the [Temp-HC3 dataset card](temp-hc3.md) for its contribution, construction, detailed schema, and citation.
+
+```bash
+python scripts/download_assets.py --assets temp-hc3 robustness-benchmark --output /path/to/t-aware-data
+export T_AWARE_DATA_ROOT=/path/to/t-aware-data
+```
+
+The downloader checks archive and individual-file SHA-256 values and extracts files into the layout below. You can also use the release's direct archive links and extract them into the same directory with `tar -xzf ARCHIVE -C /path/to/t-aware-data`.
 
 ```text
 t-aware-data/

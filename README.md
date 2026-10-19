@@ -3,13 +3,13 @@
 # T-Aware
 ### Temperature-Supervised Learning for Robust AI-Text Detection
 
-**Learning to detect AI text through generation-temperature supervision.**
+**T-Aware detector · Temp-HC3 temperature-controlled dataset**
 
 [![CPU checks](https://github.com/twzydn20000928/T-Aware/actions/workflows/tests.yml/badge.svg)](https://github.com/twzydn20000928/T-Aware/actions/workflows/tests.yml)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
 
-[Overview](#overview) · [Installation](#installation) · [Quick Start](#quick-start) · [Data](#data) · [Training](#training) · [Evaluation](#evaluation) · [Citation](#citation)
+[Overview](#overview) · [Temp-HC3](#temp-hc3-dataset) · [Downloads](#downloads) · [Quick Start](#quick-start) · [Training](#training) · [Evaluation](#evaluation) · [Citation](#citation)
 
 </div>
 
@@ -34,7 +34,31 @@ $$
 
 where classification uses all examples and temperature regression uses only AI examples with temperature labels. The default configuration uses raw temperature targets and $\lambda=10$.
 
-### Robustness results
+## Temp-HC3 Dataset
+
+**Temp-HC3 is a standalone contribution of this work:** a temperature-controlled
+dataset for studying how AI-text detection changes across generator families and
+decoding temperatures. Each source question and human answer is paired with AI
+generations at 13 temperatures, with source-group, model, and temperature metadata.
+It supports detector training, temperature prediction, cross-generator evaluation,
+and statistical analysis independently of the T-Aware model.
+
+| Generator families | AI temperatures | Fixed splits | Total records |
+| :--- | :--- | :--- | ---: |
+| Llama-3 · Mistral · Gemma-2 | 13 settings from 0.2 to 3.5 | Train · Validation · Test | **418,110** |
+
+The **complete dataset is distributed in one archive**, including all three
+generators and all fixed splits. It contains 388,245 AI generations and 29,865 human
+anchors, including human answers repeated across generator partitions. Each
+generator has 8,000 / 975 / 980 source groups in its train / validation / test files.
+The optional robustness benchmark is a companion resource, not a replacement for
+Temp-HC3's own evaluation splits.
+
+**[Download Temp-HC3](https://github.com/twzydn20000928/T-Aware/releases/download/v0.1.0/temp-hc3-v0.1.0.tar.gz)** ·
+**[Dataset card, construction, and schema](docs/temp-hc3.md)** ·
+**[Versioned release](https://github.com/twzydn20000928/T-Aware/releases/tag/v0.1.0)**
+
+## Robustness Results
 
 AI recall (%) on the HC3 benchmark, from the reference checkpoint evaluations:
 
@@ -47,6 +71,35 @@ AI recall (%) on the HC3 benchmark, from the reference checkpoint evaluations:
 | Recursive paraphrasing | 81.98 | **96.67** |
 
 The no-attack and paraphrasing conditions use HC3 ChatGPT text; Min-P uses Mistral-generated text. Human recall for these reference evaluations is 98.02% for classification only and 96.35% for T-Aware. The evaluation commands below report both classes, accuracy, and F1.
+
+## Downloads
+
+All resources are hosted in the [v0.1.0 GitHub Release](https://github.com/twzydn20000928/T-Aware/releases/tag/v0.1.0). No server account or access request is needed.
+
+| Resource | Download | Size | Contents |
+| :--- | :--- | ---: | :--- |
+| **Temp-HC3** | [Complete dataset](https://github.com/twzydn20000928/T-Aware/releases/download/v0.1.0/temp-hc3-v0.1.0.tar.gz) | 441 MiB | All 9 files: three generators × train/validation/test |
+| Robustness benchmarks | [Companion evaluation data](https://github.com/twzydn20000928/T-Aware/releases/download/v0.1.0/t-aware-robustness-v0.1.0.tar.gz) | 26 MiB | Attack sets, domain/generator transfer, variance and source files |
+| **T-Aware weights** | [RoBERTa-base, lambda=10](https://github.com/twzydn20000928/T-Aware/releases/download/v0.1.0/t-aware-roberta-base-v0.1.0.tar.gz) | 442 MiB | Trained detector, model configuration, and tokenizer |
+| Classification-only weights | [RoBERTa-base, lambda=0](https://github.com/twzydn20000928/T-Aware/releases/download/v0.1.0/t-aware-classification-only-v0.1.0.tar.gz) | 442 MiB | Matched ablation checkpoint, configuration, and tokenizer |
+
+[SHA-256 checksums](https://github.com/twzydn20000928/T-Aware/releases/download/v0.1.0/SHA256SUMS) ·
+[Detailed file manifest](configs/assets.json). The archives extract into one shared
+data root without requiring files to be renamed.
+
+Use the included downloader to verify hashes and extract the files automatically:
+
+```bash
+# Get the complete dataset independently
+python scripts/download_assets.py --assets temp-hc3 --output /path/to/t-aware-data
+
+# Or get all data and both detectors (about 1.32 GiB in total)
+python scripts/download_assets.py --assets all --output /path/to/t-aware-data
+```
+
+Select `t-aware`, `classification-only`, or `robustness-benchmark` to fetch only
+those resources. Rerunning the same command resumes interrupted downloads and
+reuses matching files. `--download-only` retains the archives without extracting.
 
 ## Installation
 
@@ -76,13 +129,16 @@ python -m pip install -e '.[quality]'      # BERTScore and perplexity
 
 ### Detect a passage
 
-With a trained checkpoint, run:
+Download the released detector and run inference with its included tokenizer:
 
 ```bash
+python scripts/download_assets.py --assets t-aware --output /path/to/t-aware-data
+export T_AWARE_DATA_ROOT=/path/to/t-aware-data
+
 python examples/detect.py \
-  --checkpoint /path/to/checkpoint/model.pt \
-  --model-config /path/to/checkpoint \
-  --tokenizer roberta-base \
+  --checkpoint "$T_AWARE_DATA_ROOT/saved_models_epoch50/best_defense_model_FINAL_TESTED.pt" \
+  --model-config "$T_AWARE_DATA_ROOT/roberta-base" \
+  --tokenizer "$T_AWARE_DATA_ROOT/roberta-base" \
   --text "The passage you want to classify." \
   --device cpu
 ```
@@ -91,9 +147,10 @@ The command returns a `human` or `ai` label and the softmax probability assigned
 
 ### Run an experiment
 
-Point `T_AWARE_DATA_ROOT` to a directory containing the datasets described below:
+Download the dataset and attack validation data, then point `T_AWARE_DATA_ROOT` to their shared directory:
 
 ```bash
+python scripts/download_assets.py --assets temp-hc3 robustness-benchmark --output /path/to/t-aware-data
 export T_AWARE_DATA_ROOT=/path/to/t-aware-data
 
 python scripts/run.py train \
@@ -104,9 +161,9 @@ python scripts/run.py train \
 
 Training writes the chosen checkpoint, configuration, tokenizer, and validation history. The next sections describe data preparation and evaluation.
 
-## Data
+## Data Preparation
 
-**Availability:** this repository distributes the implementation. Temp-HC3 data and trained detector weights are not currently hosted for download here. Training requires prepared JSONL data; inference requires a trained checkpoint. You can run the offline installation check without either asset.
+Download the prepared resources from [Downloads](#downloads), or prepare compatible JSONL files using the [data guide](docs/data.md). The offline installation check runs without external assets.
 
 Temp-HC3 contains **418,110 records** across Llama-3, Mistral, and Gemma-2, with 13 AI generation temperatures:
 
@@ -225,6 +282,7 @@ See the [Experiment guide](docs/reproduction.md) and [Baseline guide](docs/basel
 ├── configs/               # training, ablation, and benchmark configurations
 ├── docs/                  # data, checkpoints, and experiment guides
 ├── examples/detect.py      # single-passage inference
+├── scripts/download_assets.py # verified data and model downloads
 ├── scripts/run.py          # unified experiment entry point
 ├── scripts/data/           # standalone data-generation utilities
 ├── src/t_aware/            # model, data loading, training, metrics, and analysis
@@ -246,6 +304,8 @@ If you use this implementation, please cite the T-Aware paper. The following ent
   url = {https://github.com/twzydn20000928/T-Aware}
 }
 ```
+
+If you use **Temp-HC3 as a dataset**, also cite its [versioned distribution](docs/temp-hc3.md#attribution-terms-and-citation) and the underlying HC3 corpus. The dataset card includes attribution and a dataset-specific citation entry.
 
 ## Acknowledgements
 

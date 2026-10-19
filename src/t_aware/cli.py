@@ -193,7 +193,13 @@ def benchmark(args):
     reports = []
     device = choose_device(args.device)
     for spec, checkpoint in weights:
-        tokenizer = AutoTokenizer.from_pretrained(spec.get("tokenizer", "roberta-base"))
+        tokenizer_value = spec.get("tokenizer", "roberta-base")
+        local_tokenizer = Path(tokenizer_value).expanduser()
+        if not local_tokenizer.is_absolute():
+            local_tokenizer = root / local_tokenizer
+        if local_tokenizer.is_dir():
+            tokenizer_value = str(local_tokenizer)
+        tokenizer = AutoTokenizer.from_pretrained(tokenizer_value)
         config_value = spec.get("model_config", "roberta-base")
         if config_value != "roberta-base":
             config_value = input_path(root, config_value)
