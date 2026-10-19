@@ -1,0 +1,6 @@
+# Install the matching PyTorch/CUDA build for your machine before this file.
+# These are compatibility bounds, not the historical AutoDL environment lock.
+torch>=1.8
+transformers>=4.31,<5
+numpy>=1.21,<3
+tqdm>=4.60

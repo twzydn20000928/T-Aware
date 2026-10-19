@@ -1,0 +1,107 @@
+{
+  "name": "existing-weight-main-and-domain-evaluation",
+  "max_length": 128,
+  "batch_size": 32,
+  "models": [
+    {
+      "name": "classification_only_lambda_0",
+      "checkpoint": "saved_models_epoch50/model_lambda_0.0_best.pt"
+    },
+    {
+      "name": "t_aware_existing_final_lambda_10",
+      "checkpoint": "saved_models_epoch50/best_defense_model_FINAL_TESTED.pt"
+    }
+  ],
+  "datasets": [
+    {
+      "name": "No Attack",
+      "path": "test_data/dataset.no_attack.hc3.jsonl",
+      "protocol": "HC3/ChatGPT main; Min-P uses Mistral",
+      "empty_text": "skip"
+    },
+    {
+      "name": "DIPPER",
+      "path": "test_data/dataset.dipper.hc3.jsonl",
+      "protocol": "HC3/ChatGPT main; Min-P uses Mistral",
+      "empty_text": "skip"
+    },
+    {
+      "name": "Min-P",
+      "path": "test_data/dataset.minp.mistral.hc3.jsonl",
+      "protocol": "HC3/ChatGPT main; Min-P uses Mistral",
+      "empty_text": "skip"
+    },
+    {
+      "name": "TempParaphraser",
+      "path": "test_data/dataset.tp.hc3.jsonl",
+      "protocol": "HC3/ChatGPT main; Min-P uses Mistral",
+      "empty_text": "skip"
+    },
+    {
+      "name": "Recursive K=5",
+      "path": "test_data/dataset.recursive_k5.hc3.jsonl",
+      "protocol": "HC3/ChatGPT main; Min-P uses Mistral",
+      "empty_text": "skip"
+    },
+    {
+      "name": "squad/No Attack",
+      "path": "test_data/dataset.no_attack.squad.jsonl",
+      "protocol": "cross-domain/squad",
+      "empty_text": "skip"
+    },
+    {
+      "name": "squad/DIPPER",
+      "path": "test_data/dataset.dipper.squad.jsonl",
+      "protocol": "cross-domain/squad",
+      "empty_text": "skip"
+    },
+    {
+      "name": "squad/Min-P",
+      "path": "test_data/dataset.minp.mistral.squad.jsonl",
+      "protocol": "cross-domain/squad",
+      "empty_text": "skip"
+    },
+    {
+      "name": "squad/TempParaphraser",
+      "path": "test_data/dataset.tp.squad.jsonl",
+      "protocol": "cross-domain/squad",
+      "empty_text": "skip"
+    },
+    {
+      "name": "squad/Recursive K=5",
+      "path": "test_data/dataset.recursive_k5.squad.jsonl",
+      "protocol": "cross-domain/squad",
+      "empty_text": "skip"
+    },
+    {
+      "name": "xsum/No Attack",
+      "path": "test_data/dataset.no_attack.xsum.jsonl",
+      "protocol": "cross-domain/xsum",
+      "empty_text": "skip"
+    },
+    {
+      "name": "xsum/DIPPER",
+      "path": "test_data/dataset.dipper.xsum.jsonl",
+      "protocol": "cross-domain/xsum",
+      "empty_text": "skip"
+    },
+    {
+      "name": "xsum/Min-P",
+      "path": "test_data/dataset.minp.mistral.xsum.jsonl",
+      "protocol": "cross-domain/xsum",
+      "empty_text": "skip"
+    },
+    {
+      "name": "xsum/TempParaphraser",
+      "path": "test_data/dataset.tp.xsum.jsonl",
+      "protocol": "cross-domain/xsum",
+      "empty_text": "skip"
+    },
+    {
+      "name": "xsum/Recursive K=5",
+      "path": "test_data/dataset.recursive_k5.xsum.jsonl",
+      "protocol": "cross-domain/xsum",
+      "empty_text": "skip"
+    }
+  ]
+}

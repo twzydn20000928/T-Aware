@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "t-aware"
+version = "0.1.0"
+description = "Temperature-supervised AI-text detection with auditable experiment protocols"
+requires-python = ">=3.9"
+dependencies = ["torch>=1.8", "transformers>=4.31,<5", "numpy>=1.21,<3", "tqdm>=4.60"]
+
+[project.optional-dependencies]
+analysis = ["scikit-learn>=1.0", "matplotlib>=3.5"]
+quality = ["bert-score>=0.3.13"]
+llm = ["openai>=1"]
+generation = ["accelerate>=0.26", "datasets>=2"]
+sa = ["huggingface-hub>=0.23,<1"]
+
+[project.scripts]
+t-aware = "t_aware.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,0 +1,22 @@
+{
+  "name": "observed-legacy-raw-temperature",
+  "status": "derived from local ablation_tp.py; not verified as the paper training run",
+  "base_model": "roberta-base",
+  "train_file": "dataset/dataset.llama3.train.jsonl",
+  "val_standard": "dataset/dataset.llama3.val.clean.jsonl",
+  "val_attack": "test_data/dataset.tp.hc3.val.jsonl",
+  "temperature_scale": "raw",
+  "empty_text": "keep",
+  "balance_train": true,
+  "balance_validation": true,
+  "epochs": 50,
+  "patience": 15,
+  "checkpoint_policy": "best_validation",
+  "batch_size": 128,
+  "max_length": 128,
+  "learning_rate": 0.00002,
+  "weight_decay": 0.01,
+  "warmup_ratio": 0.0,
+  "seed": 42,
+  "lambdas": [0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0]
+}

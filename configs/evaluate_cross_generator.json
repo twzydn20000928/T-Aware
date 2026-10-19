@@ -1,0 +1,106 @@
+{
+  "name": "existing-weight-generator-transfer",
+  "max_length": 128,
+  "batch_size": 32,
+  "models": [
+    {
+      "name": "t_aware_existing_final_lambda_10",
+      "checkpoint": "saved_models_epoch50/best_defense_model_FINAL_TESTED.pt"
+    }
+  ],
+  "datasets": [
+    {
+      "name": "llama3/No Attack",
+      "path": "dataset/dataset.llama3.test.clean.jsonl",
+      "protocol": "Temp-HC3/llama3/standard-balanced",
+      "balance_humans": true,
+      "empty_text": "keep"
+    },
+    {
+      "name": "llama3/DIPPER",
+      "path": "test_data/dataset.dipper.llama3.jsonl",
+      "protocol": "Temp-HC3/llama3/attacks",
+      "empty_text": "skip"
+    },
+    {
+      "name": "llama3/Min-P",
+      "path": "test_data/dataset.minp.llama3.jsonl",
+      "protocol": "Temp-HC3/llama3/attacks",
+      "empty_text": "skip"
+    },
+    {
+      "name": "llama3/TempParaphraser",
+      "path": "test_data/dataset.tp.llama3.jsonl",
+      "protocol": "Temp-HC3/llama3/attacks",
+      "empty_text": "skip"
+    },
+    {
+      "name": "llama3/Recursive (depth disputed)",
+      "path": "test_data/dataset.recursive_k5.llama3.jsonl",
+      "protocol": "Temp-HC3/llama3/attacks",
+      "empty_text": "skip"
+    },
+    {
+      "name": "mistral/No Attack",
+      "path": "dataset/dataset.mistral.test.clean.jsonl",
+      "protocol": "Temp-HC3/mistral/standard-balanced",
+      "balance_humans": true,
+      "empty_text": "keep"
+    },
+    {
+      "name": "mistral/DIPPER",
+      "path": "test_data/dataset.dipper.mistral.jsonl",
+      "protocol": "Temp-HC3/mistral/attacks",
+      "empty_text": "skip"
+    },
+    {
+      "name": "mistral/Min-P",
+      "path": "test_data/dataset.minp.mistral.jsonl",
+      "protocol": "Temp-HC3/mistral/attacks",
+      "empty_text": "skip"
+    },
+    {
+      "name": "mistral/TempParaphraser",
+      "path": "test_data/dataset.tp.mistral.jsonl",
+      "protocol": "Temp-HC3/mistral/attacks",
+      "empty_text": "skip"
+    },
+    {
+      "name": "mistral/Recursive (depth disputed)",
+      "path": "test_data/dataset.recursive_k5.mistral.jsonl",
+      "protocol": "Temp-HC3/mistral/attacks",
+      "empty_text": "skip"
+    },
+    {
+      "name": "gemma2/No Attack",
+      "path": "dataset/dataset.gemma2.test.clean.jsonl",
+      "protocol": "Temp-HC3/gemma2/standard-balanced",
+      "balance_humans": true,
+      "empty_text": "keep"
+    },
+    {
+      "name": "gemma2/DIPPER",
+      "path": "test_data/dataset.dipper.gemma2.jsonl",
+      "protocol": "Temp-HC3/gemma2/attacks",
+      "empty_text": "skip"
+    },
+    {
+      "name": "gemma2/Min-P",
+      "path": "test_data/dataset.minp.gemma2.jsonl",
+      "protocol": "Temp-HC3/gemma2/attacks",
+      "empty_text": "skip"
+    },
+    {
+      "name": "gemma2/TempParaphraser",
+      "path": "test_data/dataset.tp.gemma2.jsonl",
+      "protocol": "Temp-HC3/gemma2/attacks",
+      "empty_text": "skip"
+    },
+    {
+      "name": "gemma2/Recursive (depth disputed)",
+      "path": "test_data/dataset.recursive_k5.gemma2.jsonl",
+      "protocol": "Temp-HC3/gemma2/attacks",
+      "empty_text": "skip"
+    }
+  ]
+}
