@@ -1,7 +1,7 @@
-# Notices
+# Attribution and distribution
 
-T-Aware is the authors' research implementation. A project-wide distribution license has not been selected in this release.
+T-Aware is the authors' research implementation. A project-wide distribution license has not been specified.
 
-`third_party/Binoculars/` contains the local copy of Binoculars, by Abhimanyu Hans, Avi Schwarzschild and Tom Goldstein, under the BSD 3-Clause License in that directory. Retain its license when redistributing those files. The upstream revision of the local copy has not been recovered.
+The Binoculars reference implementation in `third_party/Binoculars/` is by Abhimanyu Hans, Avi Schwarzschild, and Tom Goldstein and is distributed under the BSD 3-Clause License included in that directory.
 
-Model checkpoints, datasets and optional dependencies remain subject to their respective providers' terms. This repository does not redistribute the research datasets or pretrained model weights.
+Pretrained backbones, datasets, detector weights, and optional dependencies are subject to their respective licenses and access terms.

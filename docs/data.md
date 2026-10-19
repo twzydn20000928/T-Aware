@@ -1,42 +1,99 @@
-# Dataset layout and populations
+# Data preparation
 
-Pass the original asset directory via `--data-root` or `T_AWARE_DATA_ROOT`. Relative asset paths in JSON evaluation/training configs are resolved against that explicit root, not against the script's directory. No research datasets are bundled.
+T-Aware reads one JSON object per line. Labels use **0 = human** and **1 = AI**. Set an external data directory with `--data-root /path/to/t-aware-data` or `T_AWARE_DATA_ROOT`; configuration paths are resolved relative to that directory.
 
-## Temp-HC3 generated text
+## Availability and directory layout
 
-Generated JSONL records have `id`, `base_id`, `prompt`, `model`, `generation_T`, `generated_text`. Human anchors use temperature -1; all nonnegative temperatures represent AI. AI temperatures are 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.5, 3.0 and 3.5.
+The Git repository contains code and configurations. Benchmark datasets and detector weights are not currently provided as public downloads in this repository. The commands below describe how to prepare compatible inputs and where existing assets belong.
 
-| Per generator | Records | AI | Human | base_id groups |
+```text
+t-aware-data/
+├── dataset/             # generated train/validation/test JSONL
+├── test_data/           # validation attacks and benchmark JSONL
+└── saved_models_epoch50/ # reference detector weights
+```
+
+## Training records
+
+AI examples need text, a source-group identifier, and the generation temperature:
+
+```json
+{"id":"train_0001_llama3_T1.2","base_id":"train_0001","prompt":"Example question","model":"llama3","generation_T":1.2,"generated_text":"An AI-generated answer."}
+{"id":"train_0001_Human_Anchor","base_id":"train_0001","prompt":"Example question","model":"Human","generation_T":-1.0,"generated_text":"A human-written answer."}
+```
+
+`generation_T < 0` denotes human text. Nonnegative temperatures denote AI text. An explicit `label` is also accepted; if present alongside a temperature, the two must agree. The loader accepts either `text` or `generated_text`.
+
+Retain the same `base_id` for temperature variants of one source prompt. Training and validation must have disjoint source groups. If no `base_id` is supplied, the loader can derive groups from `prompt`, `source_id`, `origin_id`, or `id`.
+
+## Temp-HC3
+
+The benchmark covers Llama-3, Mistral, and Gemma-2 at temperatures `0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.5, 3.0, 3.5`.
+
+| Split per generator | Source groups | Human | AI | Total |
 | --- | ---: | ---: | ---: | ---: |
-| train | 112,000 | 104,000 | 8,000 | 8,000 |
-| val.clean | 13,650 | 12,675 | 975 | 975 |
-| test.clean | 13,720 | 12,740 | 980 | 980 |
+| Train | 8,000 | 8,000 | 104,000 | 112,000 |
+| Validation | 975 | 975 | 12,675 | 13,650 |
+| Test | 980 | 980 | 12,740 | 13,720 |
 
-Three generators produce 418,110 records in total. Human anchors are repeated across generators. Historical human repetition produces 208,000 effective training, 25,350 validation and 25,480 standard-test observations per generator. These effective observations are not independent samples.
+There are 418,110 records across the three generators, including repeated human answers across generator partitions. The default training configuration uses Llama-3 generations. Human repetition during training balances the 13:1 AI-to-human record ratio.
 
-## Attack data
+Expected file names include `dataset.llama3.train.jsonl`, `dataset.llama3.val.clean.jsonl`, and `dataset.llama3.test.clean.jsonl`. Generator-transfer evaluation also uses the corresponding `mistral` and `gemma2` test files.
 
-Attack JSONL requires `text`, `label` (Human=0, AI=1). Some files also contain id/source metadata, `origin_text`, type and generation_T. Paired human/AI rows can intentionally share an ID; group them by source rather than splitting rows randomly.
+## Evaluation records
 
-| Population | Observed local size | Caveat |
-| --- | ---: | --- |
-| HC3 TP validation | 1,916 (958 per class) | separate from testing |
-| HC3 TP test | 1,920 (960 per class) | original ChatGPT population |
-| Llama-3 and Mistral TP | 1,960 each | different population from main HC3/ChatGPT |
-| Gemma TP | 1,959 (980 Human, 979 AI) | one missing AI row |
-| DIPPER, Min-P, recursive for each Temp-HC3 generator | 72 each (36 per class) | small subsets |
-| variance-annotated Llama test | 280 rows, 20 base_id groups | probe subset, not full test |
+Detection evaluation requires text and a source label; temperature is optional:
 
-Files named `dataset.recursive_k5.{llama3,mistral,gemma2}.jsonl` label their AI type as `ai_recursive_k2`. Until generation provenance is recovered, the release calls this depth disputed rather than certifying K=5.
+```json
+{"id":"example_01_human","source_id":"example_01","text":"A human answer.","label":0}
+{"id":"example_01_attacked","source_id":"example_01","text":"A paraphrased AI answer.","label":1}
+```
 
-## Data checks and empty text
+For rewrite-quality analysis, AI records additionally need `origin_text`, containing the passage before paraphrasing. Variance probing needs the numeric `variance` field and source-group metadata.
 
-The inspected files have valid JSON syntax, but contain empty texts. Generated Gemma train/val.clean/test.clean contain 165/16/20 empty records; Llama train has 4; Mistral train/val.clean/test.clean contain 14/2/2. HC3 DIPPER has 1, and Llama TP has 2. Check results may differ if whitespace-only text is counted; the new checker counts it as empty.
+| Evaluation population | Data |
+| --- | --- |
+| HC3 main benchmark | `dataset.no_attack.hc3.jsonl`, `dataset.dipper.hc3.jsonl`, `dataset.minp.mistral.hc3.jsonl`, `dataset.tp.hc3.jsonl`, `dataset.recursive_k5.hc3.jsonl` |
+| Attack validation | `dataset.tp.hc3.val.jsonl` |
+| Domain transfer | corresponding attack files with `squad` and `xsum` suffixes |
+| Generator transfer | corresponding attack files with `llama3`, `mistral`, and `gemma2` suffixes |
 
-The loader defaults to error. Explicit `keep` preserves empty passages for historical standard-data behavior; `skip` filters them and records how many were removed. Main attack evaluation configs explicitly choose skip; standard Temp-HC3 evaluation uses keep plus historical human repetition. Modified data must receive a new version rather than overwriting source files.
+The HC3 TP test set has 1,920 records, balanced between classes; TP validation has 1,916. Generator-specific TP files contain about 1,960 records each. The generator-specific DIPPER, Min-P, and recursive subsets contain 72 records each. Each benchmark output records the actual loaded and skipped counts.
 
-Exact prompt intersections between generated train/val.clean/test.clean are zero in the inspected copy. There are nevertheless duplicate question texts inside some splits and duplicate passage texts across splits. For example, the Llama training and main HC3 TP test files share 20 distinct human text values after stripping. This warrants source-level review; it neither proves leakage by itself nor supports a claim of complete text decontamination.
+## Validate inputs
 
-HC3 clean source datasets and generated clean datasets do not have identical membership. Match records by their source lineage and prompt, not just by a count or a shared integer suffix.
+```bash
+python scripts/run.py check-data \
+  "$T_AWARE_DATA_ROOT/dataset/dataset.llama3.train.jsonl" \
+  "$T_AWARE_DATA_ROOT/dataset/dataset.llama3.val.clean.jsonl" \
+  --empty-text keep \
+  --output outputs/data-check.json
+```
 
-The checker accepts detector-ready generated/attack schemas. Raw HC3 `question`/`human_answers` files must first be prepared into explicit source splits. This release does not silently regenerate or replace those existing splits. Recover the exact historical split/attack producers before claiming end-to-end dataset reproduction.
+Empty-text policies are `error` (reject), `keep` (retain), and `skip` (filter and count). Default training retains empty records; attack evaluation configurations skip them. Malformed JSON and conflicting labels raise an error.
+
+## Generate temperature-controlled examples
+
+Prepare source rows containing `id`, `prompt`, and `human_answer`:
+
+```json
+{"id":"train_0001","prompt":"Example question","human_answer":"A human-written answer."}
+```
+
+Then generate AI answers at all 13 temperatures and retain one human anchor per source:
+
+```bash
+python -m pip install -e '.[generation]'
+python scripts/run.py generate \
+  --input /path/to/source-train.jsonl \
+  --output outputs/llama3-train.jsonl \
+  --model meta-llama/Meta-Llama-3-8B-Instruct \
+  --model-alias llama3 \
+  --chat-template \
+  --device cuda \
+  --dtype bfloat16
+```
+
+Add `--resume` to continue an interrupted run with the same settings. Generation records the input fingerprint and settings and uses a per-source/temperature seed. Access to gated generation models must be configured separately.
+
+Standalone no-attack, Min-P, and synonym-replacement producers are available under `scripts/data/`; inspect each script's `--help` for its model and input options. The detector accepts prepared paraphrasing outputs through the evaluation schema above.

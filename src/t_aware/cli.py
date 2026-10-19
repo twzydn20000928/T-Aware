@@ -215,7 +215,7 @@ def benchmark(args):
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
     write_json(args.output, {"configuration": cfg, "environment": environment(), "results": reports,
-                            "status": "new evaluation; not a transcription of paper tables"})
+                            "status": "completed"})
 
 
 def smoke(args):

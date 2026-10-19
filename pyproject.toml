@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "t-aware"
 version = "0.1.0"
-description = "Temperature-supervised AI-text detection with auditable experiment protocols"
+description = "Temperature-supervised learning for robust AI-text detection"
 requires-python = ">=3.9"
 dependencies = ["torch>=1.8", "transformers>=4.31,<6", "numpy>=1.21,<3", "tqdm>=4.60"]
 

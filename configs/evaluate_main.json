@@ -1,14 +1,14 @@
 {
-  "name": "existing-weight-main-and-domain-evaluation",
+  "name": "hc3-and-cross-domain",
   "max_length": 128,
   "batch_size": 32,
   "models": [
     {
-      "name": "classification_only_lambda_0",
+      "name": "classification_only",
       "checkpoint": "saved_models_epoch50/model_lambda_0.0_best.pt"
     },
     {
-      "name": "t_aware_existing_final_lambda_10",
+      "name": "t_aware",
       "checkpoint": "saved_models_epoch50/best_defense_model_FINAL_TESTED.pt"
     }
   ],

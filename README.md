@@ -1,97 +1,254 @@
+<div align="center">
+
 # T-Aware
+### Temperature-Supervised Learning for Robust AI-Text Detection
 
-**Temperature-Supervised Learning for Robust AI-Text Detection**
+**Learning to detect AI text through generation-temperature supervision.**
 
-T-Aware shares a RoBERTa encoder between source classification and an auxiliary generation-temperature regressor. Human texts contribute only classification loss. Inference needs text only.
+[![CPU checks](https://github.com/twzydn20000928/T-Aware/actions/workflows/tests.yml/badge.svg)](https://github.com/twzydn20000928/T-Aware/actions/workflows/tests.yml)
+[![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
 
-This repository organizes the existing research implementation associated with the EMNLP 2026 submission and ICASSP 2027 draft. When a manuscript conflicts with the experiments, the owner's AutoDL source, assets and logs take precedence. It includes checkpoint-compatible training and evaluation, dataset checks, generation, baseline adapters, variance analysis, and reproduction notes. It does **not** bundle datasets, model weights, private manuscript/review files, or credentials.
+[Overview](#overview) · [Installation](#installation) · [Quick Start](#quick-start) · [Data](#data) · [Training](#training) · [Evaluation](#evaluation) · [Citation](#citation)
 
-**Release status:** Local and AutoDL CPU tests and strict compatibility with the actual historical checkpoint have passed; evidence is recorded in [validation](docs/validation.md). Reproduction of all paper tables remains incomplete. Manuscript claims about normalized targets, batch size, epochs and warmup disagree with the server implementation; see [paper alignment](docs/paper_alignment.md).
+</div>
 
-## Quick start
+## Overview
 
-Use an environment with a suitable PyTorch build. Core commands can run directly from the checkout without installing this package:
+T-Aware is a RoBERTa-based detector for distinguishing human-written and AI-generated text under changes in generation temperature and paraphrasing. A shared encoder learns two tasks: source classification and generation-temperature regression. Temperature supervision is applied only to AI examples; detection at inference requires **text only**.
+
+<p align="center">
+  <img src="docs/images/architecture.svg" width="1000" alt="T-Aware: a shared RoBERTa encoder with a source classification head and an AI-only temperature regression head. Only source classification is needed at inference.">
+</p>
+
+- **A simple multi-task model.** One encoder, two linear heads, and a masked auxiliary loss.
+- **Temperature-controlled training.** Temp-HC3 covers three generator families and 13 temperature settings.
+- **Robustness evaluation.** Evaluation configurations cover DIPPER, Min-P, TempParaphraser, recursive paraphrasing, generator transfer, and domain transfer.
+- **A complete experiment workflow.** Train, select checkpoints on validation data, evaluate, and export metrics and predictions as JSON.
+
+The training objective is
+
+$$
+\mathcal{L} = \mathcal{L}_{\mathrm{CE}} + \lambda\,\mathcal{L}_{\mathrm{MSE}}^{\mathrm{AI}},
+$$
+
+where classification uses all examples and temperature regression uses only AI examples with temperature labels. The default configuration uses raw temperature targets and $\lambda=10$.
+
+### Robustness results
+
+AI recall (%) on the HC3 benchmark, from the reference checkpoint evaluations:
+
+| Condition | Classification only ($\lambda=0$) | T-Aware ($\lambda=10$) |
+| :--- | ---: | ---: |
+| No attack | 98.85 | **99.69** |
+| DIPPER | 83.63 | **95.10** |
+| Min-P | 99.17 | **100.00** |
+| TempParaphraser | 78.33 | **83.54** |
+| Recursive paraphrasing | 81.98 | **96.67** |
+
+The no-attack and paraphrasing conditions use HC3 ChatGPT text; Min-P uses Mistral-generated text. Human recall for these reference evaluations is 98.02% for classification only and 96.35% for T-Aware. The evaluation commands below report both classes, accuracy, and F1.
+
+## Installation
+
+Use Python 3.9 or later and install a PyTorch build compatible with your hardware. GPU execution is recommended for training and benchmark evaluation.
 
 ```bash
 git clone https://github.com/twzydn20000928/T-Aware.git
 cd T-Aware
-pip install -r requirements.txt
-python scripts/run.py --help
-python scripts/run.py smoke
-python -m unittest discover -s tests -v
+python -m pip install -e .
 ```
 
-The offline `smoke` command uses a tiny random CPU model: it does not download RoBERTa or train on research data. For an editable installation and the `t-aware` command, use `pip install -e .`. Optional extras are `analysis`, `quality`, `generation`, `sa`, and `llm`.
-
-## Existing data and checkpoints
-
-Keep the original project directory intact. `--data-root` points to that directory, which should contain `dataset/`, `test_data/`, and `saved_models_epoch50/`. It may be on another drive or outside this clone. You do not need to copy the 16 GB asset directory into Git.
+Check the installation without downloading a model or dataset:
 
 ```bash
-python scripts/run.py check-data /path/to/original/dataset/dataset.llama3.train.jsonl --empty-text keep
-python scripts/run.py benchmark --config configs/evaluate_main.json --data-root /path/to/original --device cpu --output outputs/main.json
-python scripts/run.py benchmark --config configs/evaluate_cross_generator.json --data-root /path/to/original --device cpu --output outputs/generator-transfer.json
+python scripts/run.py smoke
 ```
 
-No-card AutoDL is sufficient for environment/data checks and tiny CPU tests. The inspected instance has a **2 GiB container memory limit** despite reporting much more host memory. Run checks serially and use a small inference batch. Modern PyTorch loads zip-format checkpoints through memory mapping to avoid a duplicate resident weight copy. Generation and training need an appropriate GPU environment. The original `saved_models_epoch50/best_defense_model_FINAL_TESTED.pt` and `model_lambda_10.0_best.pt` have identical SHA-256 checksums both locally and on AutoDL. See [checkpoints](docs/checkpoints.md).
+Optional dependencies can be installed by task:
 
-`evaluate_main.json` separates HC3/ChatGPT source text from XSum/SQuAD conditions. `evaluate_cross_generator.json` separately evaluates Llama-3, Mistral and Gemma-2. Different populations and subset sizes must not be merged into one reported experiment.
+```bash
+python -m pip install -e '.[analysis]'     # probes and plots
+python -m pip install -e '.[generation]'   # temperature-controlled generation
+python -m pip install -e '.[quality]'      # BERTScore and perplexity
+```
+
+## Quick Start
+
+### Detect a passage
+
+With a trained checkpoint, run:
+
+```bash
+python examples/detect.py \
+  --checkpoint /path/to/checkpoint/model.pt \
+  --model-config /path/to/checkpoint \
+  --tokenizer roberta-base \
+  --text "The passage you want to classify." \
+  --device cpu
+```
+
+The command returns a `human` or `ai` label and the softmax probability assigned to the AI class. For a checkpoint from this repository's training command, the tokenizer is saved in the run's `tokenizer/` directory. See [checkpoint usage](docs/checkpoints.md) for pretrained-base configuration, local model caches, and supported checkpoint files.
+
+### Run an experiment
+
+Point `T_AWARE_DATA_ROOT` to a directory containing the datasets described below:
+
+```bash
+export T_AWARE_DATA_ROOT=/path/to/t-aware-data
+
+python scripts/run.py train \
+  --config configs/train.json \
+  --device cuda \
+  --output outputs/t-aware
+```
+
+Training writes the chosen checkpoint, configuration, tokenizer, and validation history. The next sections describe data preparation and evaluation.
+
+## Data
+
+**Availability:** this repository distributes the implementation. Temp-HC3 data and trained detector weights are not currently hosted for download here. Training requires prepared JSONL data; inference requires a trained checkpoint. You can run the offline installation check without either asset.
+
+Temp-HC3 contains **418,110 records** across Llama-3, Mistral, and Gemma-2, with 13 AI generation temperatures:
+
+```text
+0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.5, 3.0, 3.5
+```
+
+| Split, per generator | Source groups | Human records | AI records |
+| :--- | ---: | ---: | ---: |
+| Train | 8,000 | 8,000 | 104,000 |
+| Validation | 975 | 975 | 12,675 |
+| Test | 980 | 980 | 12,740 |
+
+Human answers are repeated across generator partitions. Keep datasets and model weights outside the source checkout:
+
+```text
+t-aware-data/
+├── dataset/
+│   ├── dataset.llama3.train.jsonl
+│   ├── dataset.llama3.val.clean.jsonl
+│   ├── dataset.llama3.test.clean.jsonl
+│   └── ...
+├── test_data/
+│   ├── dataset.tp.hc3.val.jsonl
+│   ├── dataset.tp.hc3.jsonl
+│   ├── dataset.dipper.hc3.jsonl
+│   └── ...
+└── saved_models_epoch50/                 # reference checkpoint layout
+    ├── best_defense_model_FINAL_TESTED.pt
+    └── model_lambda_0.0_best.pt
+```
+
+Read [Data preparation](docs/data.md) for JSONL examples, source grouping, attack datasets, and generation commands. All paths in experiment configurations are resolved relative to `--data-root` or `T_AWARE_DATA_ROOT`.
 
 ## Training
 
-```bash
-python scripts/run.py train --config configs/train_observed_legacy.json --data-root /path/to/original --device cuda --output outputs/observed-run-01
+The default configuration trains on Llama-3 data using RoBERTa-base, AdamW, learning rate $2\times10^{-5}$, batch size 128, maximum length 128, and up to 50 epochs. Human examples are repeated to balance the training classes. Early stopping uses TempParaphraser validation AI recall with patience 15; test data is evaluated separately.
+
+| Configuration | Purpose |
+| :--- | :--- |
+| [`train.json`](configs/train.json) | T-Aware with $\lambda=10$ |
+| [`train_classification_only.json`](configs/train_classification_only.json) | Classification-only ablation with $\lambda=0$ |
+| [`train_lambda_sweep.json`](configs/train_lambda_sweep.json) | Sweep $\lambda\in\{0,2,4,6,8,10,12,14\}$ |
+| [`train_random_temperature.json`](configs/train_random_temperature.json) | Random-temperature auxiliary-task control |
+| [`train_normalized_temperature.json`](configs/train_normalized_temperature.json) | Optional normalized-target experiment |
+
+The run directory contains:
+
+```text
+outputs/t-aware/
+├── manifest.json          # settings, input fingerprints, and environment
+├── selection.json         # validation-selected checkpoint
+├── tokenizer/
+└── lambda_10/
+    ├── model.pt
+    ├── config.json
+    ├── run.json
+    └── history.json
 ```
 
-This profile documents the available code's raw temperature targets, human oversampling and validation-based selection. Every lambda resets the same seed. Training outputs contain model config, tokenizer, checkpoint, validation history, data fingerprints and selection metadata. **Training never reads test sets**; evaluate the selected checkpoint in a separate command:
+See [Experiment guide](docs/reproduction.md) for ablations, configuration options, and checkpoint selection.
+
+## Evaluation
+
+### Evaluate a trained model
 
 ```bash
-python scripts/run.py evaluate --data /path/to/original/test_data/dataset.tp.hc3.jsonl --checkpoint outputs/observed-run-01/lambda_10/model.pt --model-config outputs/observed-run-01/lambda_10 --tokenizer outputs/observed-run-01/tokenizer --empty-text skip --output outputs/selected-test.json
+python scripts/run.py evaluate \
+  --data "$T_AWARE_DATA_ROOT/test_data/dataset.tp.hc3.jsonl" \
+  --checkpoint outputs/t-aware/lambda_10/model.pt \
+  --model-config outputs/t-aware/lambda_10 \
+  --tokenizer outputs/t-aware/tokenizer \
+  --device cuda \
+  --empty-text skip \
+  --output outputs/tp-evaluation.json
 ```
 
-The example checkpoint path assumes lambda=10 is the desired run. Use the actual winner from `selection.json`; do not choose it using test scores.
+For a lambda sweep, use the checkpoint named in `selection.json`. Evaluation exports accuracy, AI recall, human recall, AI-positive F1, macro F1, the confusion matrix, and per-example predictions.
 
-`train_observed_legacy.json` follows the verified server script defaults: raw temperature, batch size 128, up to 50 epochs, patience 15 and no warmup. `train_hypothetical_normalized.json` is an optional **new experiment** based on unsupported manuscript settings; it is not a historical reproduction profile. It defaults to rejecting empty data. `train_random_control.json` follows the older five-epoch random-target script; a separate server script uses up to 50 epochs and validation selection. Neither establishes provenance of the draft's 51.3% result. See [reproduction](docs/reproduction.md).
+### Run benchmark suites
 
-## Analysis and baselines
+The supplied benchmark configurations use the reference checkpoint layout shown above:
 
 ```bash
-python scripts/run.py statistics --data /path/to/original/dataset/dataset.llama3.test.clean.jsonl --scorer meta-llama/Meta-Llama-3-8B-Instruct --limit-groups 20 --device cuda --dtype bfloat16 --empty-text skip --output outputs/statistics.json
-python scripts/run.py probe --data /path/to/original/dataset/dataset.llama3.test.with_variance.jsonl --checkpoint /path/to/original/saved_models_epoch50/best_defense_model_FINAL_TESTED.pt --output outputs/probe.json
+# HC3 attacks and SQuAD/XSum domain transfer
+python scripts/run.py benchmark \
+  --config configs/evaluate_main.json \
+  --device cuda \
+  --output outputs/main.json
+
+# Llama-3, Mistral, and Gemma-2 generator transfer
+python scripts/run.py benchmark \
+  --config configs/evaluate_cross_generator.json \
+  --device cuda \
+  --output outputs/cross-generator.json
 ```
 
-`statistics` reports predictive entropy separately from mean token surprisal and surprisal variance. Human targets are never inferred from a valid AI temperature such as 3.0. `probe` uses a source-group holdout, so its results need not equal historical probes that used a different split.
+To evaluate newly trained models in a suite, set each model's `checkpoint`, `model_config`, and `tokenizer` in a copy of the benchmark JSON. [Experiment guide](docs/reproduction.md) includes an example. Lower `batch_size` in the configuration for smaller devices.
 
-`baseline` provides SA, Fast-DetectGPT, Binoculars and LLM-judge adapters. They are optional and are not exercised by the offline smoke test. [Baseline instructions](docs/baselines.md) explain label calibration and dependencies. API failures remain missing predictions with coverage, rather than being converted to Human. No API calls occur unless the LLM adapter is explicitly invoked.
+## Analysis and Baselines
 
-## AutoDL preflight
+| Task | Command | Details |
+| :--- | :--- | :--- |
+| Dataset validation | `check-data` | Schema, counts, class balance, and source overlap |
+| Temperature-controlled generation | `generate` | 13 temperatures, human anchors, and resumable output |
+| Token statistics | `statistics` | Predictive entropy, mean surprisal, and surprisal variance |
+| Representation probing | `probe` | Ridge regression with a source-group holdout |
+| Rewrite quality | `quality` | BERTScore and GPT-2 perplexity |
+| External detectors | `baseline` | SuperAnnotate, Fast-DetectGPT, Binoculars, and LLM judges |
 
-From an existing AutoDL terminal, run:
+See the [Experiment guide](docs/reproduction.md) and [Baseline guide](docs/baselines.md) for commands and optional dependencies. Use `python scripts/run.py <command> --help` for all options.
 
-```bash
-python scripts/server_check.py --output /root/t-aware-preflight.json
+## Repository Structure
+
+```text
+├── configs/               # training, ablation, and benchmark configurations
+├── docs/                  # data, checkpoints, and experiment guides
+├── examples/detect.py      # single-passage inference
+├── scripts/run.py          # unified experiment entry point
+├── scripts/data/           # standalone data-generation utilities
+├── src/t_aware/            # model, data loading, training, metrics, and analysis
+├── tests/                  # offline CPU tests
+└── third_party/Binoculars/ # attributed baseline implementation
 ```
 
-The script searches common AutoDL project locations; if more than one matches, provide `--asset-root /path/to/original`. It records environment versions, input counts, checkpoint checksums, all configured evaluation populations, original-source hash comparisons and CPU test results. It does not install packages, edit source assets, start training, or read environment secrets. An existing output is never overwritten. On the inspected server, use `/root/miniconda3/envs/acl_sprint/bin/python`; a noninteractive SSH shell has no `python` command on PATH.
+For development, run `python -m unittest discover -s tests -v`. The offline tests cover data validation, masked regression, checkpoint loading, metrics, and a small train/evaluate workflow.
 
-For a separate offline comparison with the trusted historical forward/loss implementation:
+## Citation
 
-```bash
-OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 python scripts/verify_checkpoint.py --checkpoint /path/to/original/saved_models_epoch50/best_defense_model_FINAL_TESTED.pt --model-config /path/to/local/roberta-base-snapshot --legacy-source /path/to/original/ablation_tp.py --output outputs/compatibility.json
+If you use this implementation, please cite the T-Aware paper. The following entry identifies this code repository:
+
+```bibtex
+@software{taware,
+  title = {T-Aware: Temperature-Supervised Learning for Robust AI-Text Detection},
+  author = {{T-Aware Authors}},
+  year = {2026},
+  url = {https://github.com/twzydn20000928/T-Aware}
+}
 ```
 
-Use the cached RoBERTa snapshot directory for both `--model-config` and `--tokenizer` when running `evaluate` offline. These checks have passed with Transformers 4.31.0 locally and 5.13.1 on AutoDL; optional generation and baseline adapters have not all been validated on Transformers 5.
+## Acknowledgements
 
-## Data and results
+This implementation builds on PyTorch, Hugging Face Transformers, and RoBERTa. The Binoculars reference implementation is included under its BSD 3-Clause license. See [NOTICE](NOTICE.md) for attribution and distribution information.
 
-- Temp-HC3 contains 418,110 records across three generators and 13 temperatures. These include repeated human anchors, not 418,110 independent prompts.
-- Schema, known empty texts, dataset populations and subset caveats are documented in [data](docs/data.md).
-- Metrics include `f1_ai` and `f1_macro`, with absent-class denominators reported as null. Undefined metrics must not be presented as observed zero performance.
-- All result files produced here are new measurements with input/checkpoint fingerprints, not hardcoded transcriptions of paper tables.
-- `scripts/plot_results.py` plots a selected protocol from a measured benchmark JSON.
-
-Original exploratory scripts and checkpoints remain in the owner's original asset directory; duplicate notebook backups, caches, training states and redundant model definitions are excluded from this repository. The preserved attack-generation scripts are described in [migration](docs/migration.md).
-
-## Attribution
-
-The local Binoculars reference implementation is retained under `third_party/Binoculars/`, including its BSD 3-Clause license. Its upstream revision has not yet been recovered. No project-wide open-source license has been selected for T-Aware in this release; publishing this repository does not imply a new license grant. See [NOTICE](NOTICE.md).
+For questions and bug reports, please [open an issue](https://github.com/twzydn20000928/T-Aware/issues).

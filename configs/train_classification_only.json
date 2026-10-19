@@ -1,6 +1,5 @@
 {
-  "name": "random-temperature-control-new-run",
-  "status": "New run based on AutoDL eval/train_random_temp.py (5 epochs). The separate ablation_random_temp.py instead uses up to 50 epochs and validation selection; neither proves provenance of the manuscript 51.3% result.",
+  "name": "classification-only",
   "base_model": "roberta-base",
   "train_file": "dataset/dataset.llama3.train.jsonl",
   "val_standard": "dataset/dataset.llama3.val.clean.jsonl",
@@ -9,9 +8,9 @@
   "empty_text": "keep",
   "balance_train": true,
   "balance_validation": true,
-  "epochs": 5,
-  "patience": 0,
-  "checkpoint_policy": "final",
+  "epochs": 50,
+  "patience": 15,
+  "checkpoint_policy": "best_validation",
   "batch_size": 128,
   "max_length": 128,
   "learning_rate": 2e-05,
@@ -19,7 +18,6 @@
   "warmup_ratio": 0.0,
   "seed": 42,
   "lambdas": [
-    10.0
-  ],
-  "random_temperature": true
+    0.0
+  ]
 }

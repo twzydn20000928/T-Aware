@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+message: "If you use this implementation, please cite the T-Aware paper and this repository."
+type: software
+title: "T-Aware: Temperature-Supervised Learning for Robust AI-Text Detection"
+authors:
+  - name: "T-Aware Authors"
+repository-code: "https://github.com/twzydn20000928/T-Aware"
+url: "https://github.com/twzydn20000928/T-Aware"

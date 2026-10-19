@@ -1,33 +1,140 @@
-# Reproduction workflow
+# Experiment guide
 
-1. Keep an untouched original asset tree. Record the actual AutoDL environment before installing or updating dependencies.
-2. Run `scripts/server_check.py`; inspect counts and hashes against the local manifest. A no-card instance can run these read-only CPU checks.
-3. Confirm which checkpoint and dataset populations produced each target table row. Use the available lambda=10 checksum for checkpoint-compatible inference. Do not replace missing v2 weights with a differently trained model under the same name.
-4. Run main/domain and generator-transfer benchmarks separately, with a new output filename for each run. Inspect loaded/skipped counts, Human recall, AI recall and F1 convention.
-5. Only retrain if needed. `train_observed_legacy.json` follows the verified server defaults. `train_hypothetical_normalized.json` is an optional new experiment based on unsupported manuscript settings; it is not used to explain historical results. It rejects existing empty texts, so prepare a versioned clean copy or make an explicit recorded empty-text-policy decision first.
-6. Training reads training and validation files only. The selected checkpoint is recorded in `selection.json`; test evaluation is a separate invocation. Do not use a test score to select a lambda, epoch, threshold, seed or normalization formula.
-7. Save data/checkpoint hashes, exact model revisions, runtime package versions and commands with every result. Model snapshots and tokenizers should be cached for repeatable offline inference.
+All experiments use `python scripts/run.py`. An editable installation also provides the equivalent `t-aware` command. Set `T_AWARE_DATA_ROOT` or pass `--data-root` for commands that use JSON experiment configurations.
 
-## Result interpretation
-
-The main HC3/ChatGPT protocol is different from generated Llama/Mistral/Gemma transfer and the separate prompted LLM-judge evaluation. Numbers from these populations are not interchangeable. Some attack subsets have only 36 AI passages; report sample counts and uncertainty where appropriate.
-
-Report `f1_ai` or `f1_macro` by name. Macro F1 is undefined here when a true class is absent; it is null. API-judge results include coverage and invalid/failed statuses, with metrics conditional on valid requests. Retry or rerun failed requests before describing the result as full-dataset performance.
-
-## Analysis
-
-Historical scripts called mean token negative log-probability “entropy.” The new statistics command separately reports mean surprisal, unbiased sample surprisal variance and mean predictive-distribution entropy. This clarifies quantities; it does not retroactively change the manuscript figure's measurements.
-
-Ridge probes use held-out source groups, with scaling fitted on training data only. Compare lambda=0 and lambda=10 using exactly the same grouped split. AutoDL's historical probe used RidgeCV for alpha selection, then fitted and scored on the same full feature set. Its R2 is in-sample, not an independent evaluation. The new split need not reproduce R2=0.810; recoverable variance does not establish causal use or disentanglement.
-
-`quality` requires paired AI `text` and `origin_text`, calculates unrescaled RoBERTa-base BERTScore F1 and GPT-2 perplexity, and retains the historical passage-mean NLL aggregation. Perplexity is not proof that a rewrite preserves meaning.
-
-## Generation
+## Train T-Aware and the classification ablation
 
 ```bash
-python scripts/run.py generate --input /path/to/hc3.train.jsonl --output outputs/new-generations.jsonl --model meta-llama/Meta-Llama-3-8B-Instruct --model-alias llama3 --device cuda --dtype bfloat16
+export T_AWARE_DATA_ROOT=/path/to/t-aware-data
+
+python scripts/run.py train \
+  --config configs/train.json \
+  --device cuda \
+  --output outputs/t-aware
+
+python scripts/run.py train \
+  --config configs/train_classification_only.json \
+  --device cuda \
+  --output outputs/classification-only
 ```
 
-Source input requires nonempty string `id`, `prompt` and `human_answer`. Resume with the same command plus `--resume`. Resume keys include both source and temperature, and configuration/input hashes must match. Per-source/temperature seeds make missing entries reproducible independently of the number of prior entries. This explicitly seeded implementation is a new generation pipeline; it does not claim byte-identical reconstruction of historical model-default sampling.
+| Setting | Default |
+| --- | --- |
+| Encoder | `roberta-base` |
+| Classifier | linear layer, 2 logits, cross-entropy |
+| Temperature regressor | linear layer, AI-only MSE |
+| Temperature targets | raw `generation_T` |
+| Loss weight | 10 for T-Aware, 0 for classification only |
+| Optimizer | AdamW, learning rate 2e-5, weight decay 0.01 |
+| Batch size / max length | 128 / 128 tokens |
+| Maximum epochs / patience | 50 / 15 |
+| Warmup | 0 |
+| Seed | 42 |
+| Checkpoint selection | highest AI recall on attack validation |
 
-The original standalone No Attack, Min-P and synonym scripts are retained under `scripts/data/` with an added guard against overwriting existing outputs. Their additional models/NLTK dependencies are optional and have not been run in the release's offline validation. The exact historical TempParaphraser/DIPPER/recursive generation scripts were not found in either the inspected local copy or the inspected server source tree; recover their exact versions and configurations before claiming dataset reconstruction.
+Human records are repeated using `max(1, N_ai // N_human)`. Training and validation files must have disjoint source groups. The standard validation set is balanced by human repetition; the attack validation set is evaluated as supplied. Test data is evaluated in a separate command.
+
+Reduce `batch_size` in a copy of a training configuration if needed. Use a fresh `--output` directory for each experiment; existing run directories are protected against overwrite.
+
+## Auxiliary-task ablations
+
+```bash
+python scripts/run.py train --config configs/train_lambda_sweep.json --device cuda --output outputs/lambda-sweep
+python scripts/run.py train --config configs/train_random_temperature.json --device cuda --output outputs/random-temperature
+python scripts/run.py train --config configs/train_normalized_temperature.json --device cuda --output outputs/normalized-temperature
+```
+
+The lambda sweep resets the same seed for each loss weight. The random-temperature configuration resamples AI targets from `U(0.2, 3.5)` on access and runs for five epochs, saving the final checkpoint. The optional normalized-target configuration uses `(T-0.2)/3.3`, five epochs, batch size 16, 10% warmup, and final-epoch checkpointing. These options are separate experimental configurations; compare runs using the settings recorded in their manifests.
+
+## Evaluate a selected checkpoint
+
+For a default run:
+
+```bash
+python scripts/run.py evaluate \
+  --data "$T_AWARE_DATA_ROOT/test_data/dataset.tp.hc3.jsonl" \
+  --checkpoint outputs/t-aware/lambda_10/model.pt \
+  --model-config outputs/t-aware/lambda_10 \
+  --tokenizer outputs/t-aware/tokenizer \
+  --max-length 128 \
+  --batch-size 32 \
+  --device cuda \
+  --empty-text skip \
+  --output outputs/t-aware-tp.json
+```
+
+For a sweep, read the chosen path from `selection.json`. Output includes accuracy, AI/human recall, false-positive rate, AI precision, `f1_ai`, `f1_macro`, confusion matrix, per-example predictions, and data/checkpoint fingerprints. A metric is `null` when the required true class is absent.
+
+## Benchmark matrices
+
+`configs/evaluate_main.json` covers HC3 attacks and SQuAD/XSum domain transfer. `configs/evaluate_cross_generator.json` covers Llama-3, Mistral, and Gemma-2. Standard generator test sets repeat human examples for balance; attack sets use their supplied class distribution.
+
+To benchmark newly trained weights, create a copy of a matrix and replace its `models` section. Use absolute paths or paths relative to the data root:
+
+```json
+{
+  "name": "t_aware",
+  "checkpoint": "/path/to/outputs/t-aware/lambda_10/model.pt",
+  "model_config": "/path/to/outputs/t-aware/lambda_10/config.json",
+  "tokenizer": "/path/to/outputs/t-aware/tokenizer"
+}
+```
+
+```bash
+python scripts/run.py benchmark --config configs/evaluate_main.json --device cuda --output outputs/main.json
+python scripts/run.py benchmark --config configs/evaluate_cross_generator.json --device cuda --output outputs/transfer.json
+```
+
+The benchmark saves each model/dataset pair separately, including its population, counts, class-specific metrics, and fingerprints. Keep domain-transfer and generator-transfer results separate when reporting them.
+
+## Token statistics
+
+```bash
+python -m pip install -e '.[analysis]'
+python scripts/run.py statistics \
+  --data "$T_AWARE_DATA_ROOT/dataset/dataset.llama3.test.clean.jsonl" \
+  --scorer meta-llama/Meta-Llama-3-8B-Instruct \
+  --limit-groups 20 \
+  --device cuda \
+  --dtype bfloat16 \
+  --empty-text skip \
+  --output outputs/statistics.json
+```
+
+The output distinguishes predictive-distribution entropy, mean token surprisal, and unbiased sample surprisal variance. Results are grouped by generation temperature, with human examples in a separate group.
+
+## Representation probing
+
+```bash
+python scripts/run.py probe \
+  --data "$T_AWARE_DATA_ROOT/dataset/dataset.llama3.test.with_variance.jsonl" \
+  --checkpoint outputs/t-aware/lambda_10/model.pt \
+  --model-config outputs/t-aware/lambda_10 \
+  --tokenizer outputs/t-aware/tokenizer \
+  --ai-only \
+  --device cuda \
+  --output outputs/probe.json
+```
+
+The probe extracts frozen first-token features, holds out 20% of source groups, fits scaling on training groups, and trains Ridge regression. Compare models with the same data and seed.
+
+## Rewrite quality
+
+```bash
+python -m pip install -e '.[quality]'
+python scripts/run.py quality --data /path/to/paired-rewrites.jsonl --device cuda --output outputs/quality.json
+```
+
+AI records need `text` and `origin_text`. The command reports unrescaled RoBERTa-base BERTScore F1 and GPT-2 perplexity, aggregated as the exponential of mean passage NLL.
+
+## Plot benchmark outputs
+
+```bash
+python scripts/plot_results.py \
+  --input outputs/main.json \
+  --protocol 'HC3/ChatGPT main; Min-P uses Mistral' \
+  --metric ai_recall \
+  --output outputs/ai-recall.png
+```
+
+Plots read measured benchmark JSON. Choose an exact protocol string from that output. All result commands require a new output filename to protect existing measurements.

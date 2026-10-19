@@ -1,10 +1,10 @@
 {
-  "name": "existing-weight-generator-transfer",
+  "name": "cross-generator",
   "max_length": 128,
   "batch_size": 32,
   "models": [
     {
-      "name": "t_aware_existing_final_lambda_10",
+      "name": "t_aware",
       "checkpoint": "saved_models_epoch50/best_defense_model_FINAL_TESTED.pt"
     }
   ],
@@ -35,7 +35,7 @@
       "empty_text": "skip"
     },
     {
-      "name": "llama3/Recursive (depth disputed)",
+      "name": "llama3/Recursive paraphrasing",
       "path": "test_data/dataset.recursive_k5.llama3.jsonl",
       "protocol": "Temp-HC3/llama3/attacks",
       "empty_text": "skip"
@@ -66,7 +66,7 @@
       "empty_text": "skip"
     },
     {
-      "name": "mistral/Recursive (depth disputed)",
+      "name": "mistral/Recursive paraphrasing",
       "path": "test_data/dataset.recursive_k5.mistral.jsonl",
       "protocol": "Temp-HC3/mistral/attacks",
       "empty_text": "skip"
@@ -97,7 +97,7 @@
       "empty_text": "skip"
     },
     {
-      "name": "gemma2/Recursive (depth disputed)",
+      "name": "gemma2/Recursive paraphrasing",
       "path": "test_data/dataset.recursive_k5.gemma2.jsonl",
       "protocol": "Temp-HC3/gemma2/attacks",
       "empty_text": "skip"

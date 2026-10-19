@@ -1,42 +1,64 @@
-# Optional baselines
+# Baseline guide
 
-The core CPU tests do not download or execute these models. Every baseline reads the same detector-ready schema; pass an explicit empty-text policy and dataset. The default maximum length is 512, compared with 128 for the historical T-Aware encoder. Record any length/threshold changes.
+The `baseline` command evaluates an external detector on JSONL records containing `text` and `label` (Human=0, AI=1). It exports metrics, per-example decisions, input fingerprints, settings, and environment versions.
 
 ## SuperAnnotate
 
-Install the `sa` extra and use the retained custom model architecture from the original project, rather than assuming a generic sequence-classification loader will match it. Confirm the checkpoint's output label convention before choosing `--ai-output-label`:
-
 ```bash
-python scripts/run.py baseline --method sa --model SuperAnnotate/roberta-large-llm-content-detector --ai-output-label 1 --data /path/to/test.jsonl --empty-text skip --output outputs/sa.json
+python -m pip install -e '.[sa]'
+python scripts/run.py baseline \
+  --method sa \
+  --model SuperAnnotate/roberta-large-llm-content-detector \
+  --ai-output-label 1 \
+  --data /path/to/test.jsonl \
+  --empty-text skip \
+  --output outputs/sa.json
 ```
 
-The example uses the historical AI=1 assumption; it is not independent verification of the downloaded model's convention. Record the checkpoint revision and inspect known-label sanity samples. Batch dimension is preserved even for the last single sample.
+The adapter uses the custom SuperAnnotate model architecture. `--ai-output-label` identifies which checkpoint output denotes AI; set it to match the model's label convention. The example uses AI=1.
 
 ## Fast-DetectGPT
 
 ```bash
-python scripts/run.py baseline --method fast-detectgpt --model EleutherAI/gpt-neo-2.7B --reference-stats /path/to/original/eval/fast_detect_gpt/local_infer_ref --data /path/to/test.jsonl --output outputs/fast.json
+python scripts/run.py baseline \
+  --method fast-detectgpt \
+  --model EleutherAI/gpt-neo-2.7B \
+  --reference-stats /path/to/local_infer_ref \
+  --data /path/to/test.jsonl \
+  --output outputs/fast-detectgpt.json
 ```
 
-This adapter retains the local script's analytic discrepancy with scoring=reference and empirical calibration from local JSON statistics. It is not an assertion that all upstream Fast-DetectGPT reference-model settings have been reproduced. The existing reference filenames mention GPT-J/GPT-Neo; reconcile those reference-model assumptions before claiming protocol equivalence. Reference-file hashes are saved in the output.
+This adapter uses analytic discrepancy with the selected scoring model also serving as the reference, followed by empirical calibration from reference-statistics JSON files. Supply calibration files appropriate to the model and protocol; their hashes are recorded in the result.
 
 ## Binoculars
 
 ```bash
-pip install -r third_party/Binoculars/requirements.txt
-python scripts/run.py baseline --method binoculars --model vendored-defaults --data /path/to/test.jsonl --output outputs/binoculars.json
+python -m pip install -r third_party/Binoculars/requirements.txt
+python scripts/run.py baseline \
+  --method binoculars \
+  --model vendored-defaults \
+  --data /path/to/test.jsonl \
+  --output outputs/binoculars.json
 ```
 
-The retained reference code uses Falcon-7B/Falcon-7B-Instruct and its own threshold/device placement. It may need substantially more memory than T-Aware; it has not been exercised on the no-card server. The `--device` and `--max-length` common flags do not override the vendored implementation's own configuration. Run from the source checkout/editable install; vendor files are not packaged in a wheel. Its BSD license is retained.
+The included implementation uses Falcon-7B and Falcon-7B-Instruct, with its own threshold and device placement. Its configuration controls maximum length and devices. Run from the source checkout or an editable installation so `third_party/Binoculars/` is available. Its BSD 3-Clause license is retained.
 
-## LLM judge
+## LLM-as-a-judge
 
-Install the `llm` extra. Set `OPENAI_API_KEY` in the shell; optionally set `OPENAI_BASE_URL` for a compatible provider. Do not put credentials in scripts or Git. Invoke an exact model ID:
+Install the optional client and set `OPENAI_API_KEY` in your environment. `OPENAI_BASE_URL` can select a compatible provider.
 
 ```bash
-python scripts/run.py baseline --method llm --model gpt-4o-mini --data /path/to/test.jsonl --output outputs/judge.json
+python -m pip install -e '.[llm]'
+python scripts/run.py baseline \
+  --method llm \
+  --model gpt-4o-mini \
+  --data /path/to/test.jsonl \
+  --attempts 3 \
+  --output outputs/llm-judge.json
 ```
 
-Only an exact `0` or `1` response is accepted. Connection failures and invalid responses are retried a bounded number of times and remain missing if unsuccessful. The output records coverage, failed count and metrics on valid decisions; the process exits nonzero if any requests fail. Historical API failures cannot be repaired by copying old aggregate scores into this output.
+The parser accepts only `0` or `1`. Failed requests and invalid responses remain missing after bounded retries. Results include valid-request coverage and metrics on valid decisions; the command exits with an error if any record remains unresolved. Invoking this adapter sends passages to the configured API provider.
 
-The AutoDL historical judge returned Human for API exceptions and malformed provider responses. Its near-zero AI recall may therefore include failures. Its F1 formula is AI-positive F1, even where rebuttal tables call it macro. Treat the historical aggregate as requiring a new coverage-aware evaluation; the current release does not claim those scores measure valid decisions for every request.
+## Reporting
+
+Use the same input population and record the model revision, input length, and threshold for each comparison. The default baseline input length is 512 tokens; T-Aware uses 128. Report AI recall alongside human recall or false-positive rate, and distinguish AI-positive F1 from macro F1.

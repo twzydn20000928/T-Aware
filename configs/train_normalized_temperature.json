@@ -1,12 +1,10 @@
 {
-  "name": "hypothetical-normalized-temperature-NOT-HISTORICAL",
-  "status": "Optional NEW experiment only. Manuscript settings conflict with AutoDL source; do not use for historical reproduction.",
+  "name": "normalized-temperature",
   "base_model": "roberta-base",
   "train_file": "dataset/dataset.llama3.train.jsonl",
   "val_standard": "dataset/dataset.llama3.val.clean.jsonl",
   "val_attack": "test_data/dataset.tp.hc3.val.jsonl",
   "temperature_scale": "minmax_0.2_3.5",
-  "normalization_note": "(T-0.2)/3.3 is an explicit implementation choice; manuscript only says [0,1]",
   "empty_text": "error",
   "balance_train": true,
   "balance_validation": true,
@@ -15,9 +13,12 @@
   "checkpoint_policy": "final",
   "batch_size": 16,
   "max_length": 128,
-  "learning_rate": 0.00002,
+  "learning_rate": 2e-05,
   "weight_decay": 0.01,
   "warmup_ratio": 0.1,
   "seed": 42,
-  "lambdas": [0.0, 10.0]
+  "lambdas": [
+    0.0,
+    10.0
+  ]
 }

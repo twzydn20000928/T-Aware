@@ -1,18 +1,57 @@
-# Historical checkpoints
+# Checkpoints and inference
 
-Weights are not committed to Git. Put trusted local files under your external asset root.
+Detector weights are not bundled with the source checkout and are not currently hosted for public download in this repository. You can obtain a compatible checkpoint by training with the provided configurations.
 
-| Role | Asset-relative path | SHA-256 verified locally and on AutoDL |
-| --- | --- | --- |
-| Classification-only | `saved_models_epoch50/model_lambda_0.0_best.pt` | `3ec6228b0a956785b7d5a426488c69d06d2010e862907d008eaa266d6b3ab1e5` |
-| Available final | `saved_models_epoch50/best_defense_model_FINAL_TESTED.pt` | `db8ec3ea319a5390b4646e5f0674f0f7a936aa91b9ceaea63e17dd666cfd5b0a` |
-| Named lambda=10 | `saved_models_epoch50/model_lambda_10.0_best.pt` | same as available final |
-| Named lambda=12 | `saved_models_epoch50/model_lambda_12.0_best.pt` | `0019edf01b930841f0139241f7a8f27bda4d3aea94121a83a177171087d28ddd` |
+## Training outputs
 
-A historical training log reports a lambda=12 winner, 99.08% standard accuracy and 71.98% attack recall saved under `saved_models_epoch50_v2/`. Both the local and AutoDL copies of that directory contain no weights. These values cannot be attributed to the available lambda=10 file without additional evidence.
+```text
+outputs/t-aware/
+├── tokenizer/
+├── selection.json
+└── lambda_10/
+    ├── model.pt
+    ├── config.json
+    ├── run.json
+    └── history.json
+```
 
-New training saves `model.pt`, `config.json`, validation history and metadata inside each lambda directory. The tokenizer is stored once per run. Evaluation accepts legacy state_dict files and DataParallel `module.` prefixes with strict parameter checking.
+`model.pt` stores the detector state dictionary, including the encoder, two-class classifier, and temperature regressor. `config.json` stores the backbone configuration. `selection.json` identifies the validation-selected checkpoint in the run directory.
 
-The regression head is retained when loading a detector checkpoint; temperature is not an inference input. A raw-target regression output is in original temperature units; a normalized-target output is on the explicitly configured target scale. Do not interpret an unlabelled head output as calibrated temperature.
+## Classify a passage
 
-On PyTorch versions that support it, checkpoint loading uses `weights_only=True`. Zip-format checkpoints use memory mapping and tensor assignment when available, avoiding a duplicate resident weight copy on small CPU instances. Old serialization falls back to regular loading; both formats are covered by the round-trip test. Older environments should load only the owner's trusted checkpoints.
+```bash
+python examples/detect.py \
+  --checkpoint outputs/t-aware/lambda_10/model.pt \
+  --model-config outputs/t-aware/lambda_10 \
+  --tokenizer outputs/t-aware/tokenizer \
+  --text "A passage to classify." \
+  --device cpu
+```
+
+The result contains `label`, `score_ai`, and `score_human`. The scores are softmax outputs, not calibrated confidence estimates. The classifier selects the higher-scoring class. No generation-temperature input is needed.
+
+## Reference checkpoint names
+
+The benchmark configurations expect these paths under the external data root:
+
+| Model | Path |
+| --- | --- |
+| T-Aware | `saved_models_epoch50/best_defense_model_FINAL_TESTED.pt` |
+| Classification only | `saved_models_epoch50/model_lambda_0.0_best.pt` |
+
+These reference state dictionaries use the `roberta-base` configuration and tokenizer. They can be used directly with `--model-config roberta-base --tokenizer roberta-base`. The loader accepts plain state dictionaries, a `state_dict` wrapper, and DataParallel `module.` prefixes; parameter loading is strict.
+
+## Local model cache
+
+For offline evaluation, use a downloaded RoBERTa snapshot directory for both `--model-config` and `--tokenizer`:
+
+```bash
+HF_HUB_OFFLINE=1 python examples/detect.py \
+  --checkpoint /path/to/model.pt \
+  --model-config /path/to/roberta-base-snapshot \
+  --tokenizer /path/to/roberta-base-snapshot \
+  --text "A passage to classify." \
+  --device cpu
+```
+
+Modern PyTorch uses memory-mapped loading where supported. On a smaller CPU machine, run one model at a time and lower the evaluation batch size. GPU training and inference use the same model definition.
