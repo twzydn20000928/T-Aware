@@ -1,6 +1,6 @@
 {
   "name": "random-temperature-control-new-run",
-  "status": "derived from local ablation_tp.py; not verified as the paper training run",
+  "status": "New run based on AutoDL eval/train_random_temp.py (5 epochs). The separate ablation_random_temp.py instead uses up to 50 epochs and validation selection; neither proves provenance of the manuscript 51.3% result.",
   "base_model": "roberta-base",
   "train_file": "dataset/dataset.llama3.train.jsonl",
   "val_standard": "dataset/dataset.llama3.val.clean.jsonl",

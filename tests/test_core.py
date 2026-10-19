@@ -131,9 +131,11 @@ class ModelTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             self.cfg.save_pretrained(directory)
             path = Path(directory) / "model.pt"
-            torch.save(model.state_dict(), path)
-            restored = load_checkpoint(path, directory, 10).eval()
-            self.assertTrue(torch.allclose(output["logits"], restored(ids, mask)["logits"], atol=1e-7))
+            for zip_format in (True, False):
+                with self.subTest(zip_format=zip_format):
+                    torch.save(model.state_dict(), path, _use_new_zipfile_serialization=zip_format)
+                    restored = load_checkpoint(path, directory, 10).eval()
+                    self.assertTrue(torch.allclose(output["logits"], restored(ids, mask)["logits"], atol=1e-7))
 
 
 if __name__ == "__main__":

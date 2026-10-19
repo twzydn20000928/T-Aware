@@ -1,0 +1,20 @@
+{
+  "policy": "Private reference contents excluded; AutoDL evidence takes precedence",
+  "files": [
+    {
+      "name": "acl_latex (4).tex",
+      "bytes": 59736,
+      "sha256": "b65d131fd9dbee44d184b0db402afe1b95162290f1bd4198582859debd53f32a"
+    },
+    {
+      "name": "icassp (1).tex",
+      "bytes": 19928,
+      "sha256": "ab355f78f241fd0be4d548cd02bb42fbc8fa5847d0e2cef281d14278ed24211a"
+    },
+    {
+      "name": "完整rebuttal.md",
+      "bytes": 50390,
+      "sha256": "d706deab108a81c0c828ac6e5b52914a6397316b74565682df93ce45531c0166"
+    }
+  ]
+}

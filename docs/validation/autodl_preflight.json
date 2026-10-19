@@ -1,0 +1,1029 @@
+{
+  "environment": {
+    "python": "3.10.19",
+    "platform": "Linux-5.15.0-78-generic-x86_64-with-glibc2.35",
+    "packages": {
+      "torch": "2.9.1",
+      "transformers": "5.13.1",
+      "numpy": "2.2.6",
+      "tqdm": "4.67.1",
+      "scikit-learn": "1.7.2",
+      "huggingface-hub": "1.23.0"
+    },
+    "recorded_at_utc": "2026-10-19T13:57:00.907697+00:00"
+  },
+  "python_executable": "/root/miniconda3/envs/acl_sprint/bin/python",
+  "cgroup_memory": {
+    "memory.max": "2147483648",
+    "memory.current": "1675767808"
+  },
+  "asset_root": "/root/autodl-tmp",
+  "data": [
+    {
+      "path": "dataset/dataset.llama3.train.jsonl",
+      "file": {
+        "name": "dataset.llama3.train.jsonl",
+        "bytes": 453847164,
+        "sha256": "c07ea12ab62e89e87f5918029c0d3b4c17153b99a48764d9e3601b473cd05a01"
+      },
+      "statistics": {
+        "input_records": 112000,
+        "empty_records": 4,
+        "skipped_records": 0,
+        "blank_lines": 0,
+        "empty_text_policy": "keep",
+        "loaded_records": 112000,
+        "labels": {
+          "1": 104000,
+          "0": 8000
+        },
+        "source_groups": 8000
+      }
+    },
+    {
+      "path": "dataset/dataset.llama3.val.clean.jsonl",
+      "file": {
+        "name": "dataset.llama3.val.clean.jsonl",
+        "bytes": 55346916,
+        "sha256": "4ce692bb2243227a1c197e6e7c89c451dbba335f3ded10262d5e12c5335bb0f1"
+      },
+      "statistics": {
+        "input_records": 13650,
+        "empty_records": 0,
+        "skipped_records": 0,
+        "blank_lines": 0,
+        "empty_text_policy": "keep",
+        "loaded_records": 13650,
+        "labels": {
+          "1": 12675,
+          "0": 975
+        },
+        "source_groups": 975
+      }
+    },
+    {
+      "path": "dataset/dataset.llama3.test.clean.jsonl",
+      "file": {
+        "name": "dataset.llama3.test.clean.jsonl",
+        "bytes": 55608950,
+        "sha256": "5715b8315413728d4a204c66490bb83bde1b9ec475d96f4c6217c46e7c622160"
+      },
+      "statistics": {
+        "input_records": 13720,
+        "empty_records": 0,
+        "skipped_records": 0,
+        "blank_lines": 0,
+        "empty_text_policy": "keep",
+        "loaded_records": 13720,
+        "labels": {
+          "1": 12740,
+          "0": 980
+        },
+        "source_groups": 980
+      }
+    },
+    {
+      "path": "test_data/dataset.tp.hc3.val.jsonl",
+      "file": {
+        "name": "dataset.tp.hc3.val.jsonl",
+        "bytes": 1751815,
+        "sha256": "9eecdb447e0cfae56b5afde25d09313836afdd586be909598d1028eb397a222f"
+      },
+      "statistics": {
+        "input_records": 1916,
+        "empty_records": 0,
+        "skipped_records": 0,
+        "blank_lines": 0,
+        "empty_text_policy": "keep",
+        "loaded_records": 1916,
+        "labels": {
+          "0": 958,
+          "1": 958
+        },
+        "source_groups": 958
+      }
+    },
+    {
+      "path": "test_data/dataset.tp.hc3.jsonl",
+      "file": {
+        "name": "dataset.tp.hc3.jsonl",
+        "bytes": 1730176,
+        "sha256": "efe8fb6a490b5d65486ff333cec0b54b539925c97cfb93e1b45d0b33047bf639"
+      },
+      "statistics": {
+        "input_records": 1920,
+        "empty_records": 0,
+        "skipped_records": 0,
+        "blank_lines": 0,
+        "empty_text_policy": "keep",
+        "loaded_records": 1920,
+        "labels": {
+          "0": 960,
+          "1": 960
+        },
+        "source_groups": 960
+      }
+    }
+  ],
+  "weights": [
+    {
+      "path": "saved_models_epoch50/best_defense_model_FINAL_TESTED.pt",
+      "file": {
+        "name": "best_defense_model_FINAL_TESTED.pt",
+        "bytes": 498678888,
+        "sha256": "db8ec3ea319a5390b4646e5f0674f0f7a936aa91b9ceaea63e17dd666cfd5b0a"
+      }
+    },
+    {
+      "path": "saved_models_epoch50/model_lambda_0.0_best.pt",
+      "file": {
+        "name": "model_lambda_0.0_best.pt",
+        "bytes": 498678615,
+        "sha256": "3ec6228b0a956785b7d5a426488c69d06d2010e862907d008eaa266d6b3ab1e5"
+      }
+    },
+    {
+      "path": "saved_models_epoch50/model_lambda_10.0_best.pt",
+      "file": {
+        "name": "model_lambda_10.0_best.pt",
+        "bytes": 498678888,
+        "sha256": "db8ec3ea319a5390b4646e5f0674f0f7a936aa91b9ceaea63e17dd666cfd5b0a"
+      }
+    },
+    {
+      "path": "saved_models_epoch50/model_lambda_12.0_best.pt",
+      "file": {
+        "name": "model_lambda_12.0_best.pt",
+        "bytes": 498678888,
+        "sha256": "0019edf01b930841f0139241f7a8f27bda4d3aea94121a83a177171087d28ddd"
+      }
+    },
+    {
+      "path": "saved_models_epoch50/model_lambda_14.0_best.pt",
+      "file": {
+        "name": "model_lambda_14.0_best.pt",
+        "bytes": 498678888,
+        "sha256": "a15e770bfa1aaa61a572438f4f63e5f7a06976dae2a70d4cd2fe68383d4055fd"
+      }
+    },
+    {
+      "path": "saved_models_epoch50/model_lambda_2.0_best.pt",
+      "file": {
+        "name": "model_lambda_2.0_best.pt",
+        "bytes": 498678615,
+        "sha256": "fed231b89b8fc8fa6c27c0a069165be38f7e90eecd5552a50951d8e3bf4d1593"
+      }
+    },
+    {
+      "path": "saved_models_epoch50/model_lambda_4.0_best.pt",
+      "file": {
+        "name": "model_lambda_4.0_best.pt",
+        "bytes": 498678615,
+        "sha256": "1eaf4b2b7649f9ac9c3c877df05aa3844ad94f61f6730725486a29eb5a4118d9"
+      }
+    },
+    {
+      "path": "saved_models_epoch50/model_lambda_6.0_best.pt",
+      "file": {
+        "name": "model_lambda_6.0_best.pt",
+        "bytes": 498678615,
+        "sha256": "232d0d800faa0ce284e0ff534d54272705ff832621e03f8bb2db6a66317ac35f"
+      }
+    },
+    {
+      "path": "saved_models_epoch50/model_lambda_8.0_best.pt",
+      "file": {
+        "name": "model_lambda_8.0_best.pt",
+        "bytes": 498678615,
+        "sha256": "b505963220aa854d1c65c066b11be063a57df612fca53b60c5eaac59d9a3668f"
+      }
+    }
+  ],
+  "evaluation_matrices": [
+    {
+      "config": "evaluate_cross_generator.json",
+      "datasets": [
+        {
+          "name": "llama3/No Attack",
+          "path": "dataset/dataset.llama3.test.clean.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.llama3.test.clean.jsonl",
+            "bytes": 55608950,
+            "sha256": "5715b8315413728d4a204c66490bb83bde1b9ec475d96f4c6217c46e7c622160"
+          },
+          "statistics": {
+            "input_records": 13720,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "keep",
+            "loaded_records": 13720,
+            "labels": {
+              "1": 12740,
+              "0": 980
+            },
+            "source_groups": 980
+          }
+        },
+        {
+          "name": "llama3/DIPPER",
+          "path": "test_data/dataset.dipper.llama3.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.dipper.llama3.jsonl",
+            "bytes": 132773,
+            "sha256": "78c482b338f2e2619b57100c8544074ffbfaa533752ba24d9c7fe5401b0d5ce9"
+          },
+          "statistics": {
+            "input_records": 72,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 72,
+            "labels": {
+              "1": 36,
+              "0": 36
+            },
+            "source_groups": 36
+          }
+        },
+        {
+          "name": "llama3/Min-P",
+          "path": "test_data/dataset.minp.llama3.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.minp.llama3.jsonl",
+            "bytes": 106254,
+            "sha256": "90e34696ab682ca3aab03c07fe7cb7bce99d03ac1aa3e9c12324c7083b8ea2ff"
+          },
+          "statistics": {
+            "input_records": 72,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 72,
+            "labels": {
+              "1": 36,
+              "0": 36
+            },
+            "source_groups": 36
+          }
+        },
+        {
+          "name": "llama3/TempParaphraser",
+          "path": "test_data/dataset.tp.llama3.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.tp.llama3.jsonl",
+            "bytes": 4037417,
+            "sha256": "da55ba43d667f99d1b2a85c3aaaeeb75afef968e9e6ee36980b69c893b423006"
+          },
+          "statistics": {
+            "input_records": 1960,
+            "empty_records": 2,
+            "skipped_records": 2,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 1958,
+            "labels": {
+              "1": 978,
+              "0": 980
+            },
+            "source_groups": 980
+          }
+        },
+        {
+          "name": "llama3/Recursive (depth disputed)",
+          "path": "test_data/dataset.recursive_k5.llama3.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.recursive_k5.llama3.jsonl",
+            "bytes": 258840,
+            "sha256": "495f1b5a6563e362e06637e0bd7e1438693e9a97686be887819edb47587599f9"
+          },
+          "statistics": {
+            "input_records": 72,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 72,
+            "labels": {
+              "1": 36,
+              "0": 36
+            },
+            "source_groups": 36
+          }
+        },
+        {
+          "name": "mistral/No Attack",
+          "path": "dataset/dataset.mistral.test.clean.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.mistral.test.clean.jsonl",
+            "bytes": 32427901,
+            "sha256": "f667bf1e7678370f130a2cba0b519db3ee2e8e7e12941996f8c44f4a3165a4d8"
+          },
+          "statistics": {
+            "input_records": 13720,
+            "empty_records": 2,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "keep",
+            "loaded_records": 13720,
+            "labels": {
+              "1": 12740,
+              "0": 980
+            },
+            "source_groups": 980
+          }
+        },
+        {
+          "name": "mistral/DIPPER",
+          "path": "test_data/dataset.dipper.mistral.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.dipper.mistral.jsonl",
+            "bytes": 84612,
+            "sha256": "c1a16742ebc2ae0580190cddb89a1841d0955db170b71b23620abd7fc42b028d"
+          },
+          "statistics": {
+            "input_records": 72,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 72,
+            "labels": {
+              "1": 36,
+              "0": 36
+            },
+            "source_groups": 36
+          }
+        },
+        {
+          "name": "mistral/Min-P",
+          "path": "test_data/dataset.minp.mistral.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.minp.mistral.jsonl",
+            "bytes": 83681,
+            "sha256": "9e73c7daf88930bce8438ffa090aacb67ab5bca0543a32abf87bd7a18ab23b0e"
+          },
+          "statistics": {
+            "input_records": 72,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 72,
+            "labels": {
+              "1": 36,
+              "0": 36
+            },
+            "source_groups": 36
+          }
+        },
+        {
+          "name": "mistral/TempParaphraser",
+          "path": "test_data/dataset.tp.mistral.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.tp.mistral.jsonl",
+            "bytes": 2295993,
+            "sha256": "1c05aa5e6420e92fba450434b699190eb2151f054c11e5dcf9312dbcd4ea547e"
+          },
+          "statistics": {
+            "input_records": 1960,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 1960,
+            "labels": {
+              "1": 980,
+              "0": 980
+            },
+            "source_groups": 980
+          }
+        },
+        {
+          "name": "mistral/Recursive (depth disputed)",
+          "path": "test_data/dataset.recursive_k5.mistral.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.recursive_k5.mistral.jsonl",
+            "bytes": 145050,
+            "sha256": "d123d0d97006c4cf693a57acfb8b77ebc46c2c6ea6538eb1343f748e5f319a04"
+          },
+          "statistics": {
+            "input_records": 72,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 72,
+            "labels": {
+              "1": 36,
+              "0": 36
+            },
+            "source_groups": 36
+          }
+        },
+        {
+          "name": "gemma2/No Attack",
+          "path": "dataset/dataset.gemma2.test.clean.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.gemma2.test.clean.jsonl",
+            "bytes": 35468655,
+            "sha256": "c47d26b7917359a6a09bff53cdab6ed9fe8180e24bf2543b1673ec706103d353"
+          },
+          "statistics": {
+            "input_records": 13720,
+            "empty_records": 20,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "keep",
+            "loaded_records": 13720,
+            "labels": {
+              "1": 12740,
+              "0": 980
+            },
+            "source_groups": 980
+          }
+        },
+        {
+          "name": "gemma2/DIPPER",
+          "path": "test_data/dataset.dipper.gemma2.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.dipper.gemma2.jsonl",
+            "bytes": 81272,
+            "sha256": "274208f1f082a63fe0728dc5e32f8723104658096bea46b823e20aecaa0c4855"
+          },
+          "statistics": {
+            "input_records": 72,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 72,
+            "labels": {
+              "1": 36,
+              "0": 36
+            },
+            "source_groups": 36
+          }
+        },
+        {
+          "name": "gemma2/Min-P",
+          "path": "test_data/dataset.minp.gemma2.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.minp.gemma2.jsonl",
+            "bytes": 85902,
+            "sha256": "e22d068ffaccb3a4ebee429b037eb494533cf8b648a56b84c1193f238b4808be"
+          },
+          "statistics": {
+            "input_records": 72,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 72,
+            "labels": {
+              "1": 36,
+              "0": 36
+            },
+            "source_groups": 36
+          }
+        },
+        {
+          "name": "gemma2/TempParaphraser",
+          "path": "test_data/dataset.tp.gemma2.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.tp.gemma2.jsonl",
+            "bytes": 2227658,
+            "sha256": "988659d0ec2f64b5fde26db4d36f4ed233f773d32811c1c5475b9aaebfc3ab98"
+          },
+          "statistics": {
+            "input_records": 1959,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 1959,
+            "labels": {
+              "1": 979,
+              "0": 980
+            },
+            "source_groups": 980
+          }
+        },
+        {
+          "name": "gemma2/Recursive (depth disputed)",
+          "path": "test_data/dataset.recursive_k5.gemma2.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.recursive_k5.gemma2.jsonl",
+            "bytes": 135824,
+            "sha256": "605391710b84cf97baa0aab0ac2b71192e55f64d866d6a6ab3a1d23888ddb9fa"
+          },
+          "statistics": {
+            "input_records": 72,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 72,
+            "labels": {
+              "1": 36,
+              "0": 36
+            },
+            "source_groups": 36
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "path": "saved_models_epoch50/best_defense_model_FINAL_TESTED.pt",
+          "exists": true
+        }
+      ]
+    },
+    {
+      "config": "evaluate_main.json",
+      "datasets": [
+        {
+          "name": "No Attack",
+          "path": "test_data/dataset.no_attack.hc3.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.no_attack.hc3.jsonl",
+            "bytes": 1846501,
+            "sha256": "46f4b17aaf6c00512d7ff65f331922a76d1d03a36cd2471457e6a416f17b0120"
+          },
+          "statistics": {
+            "input_records": 1920,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 1920,
+            "labels": {
+              "0": 960,
+              "1": 960
+            },
+            "source_groups": 960
+          }
+        },
+        {
+          "name": "DIPPER",
+          "path": "test_data/dataset.dipper.hc3.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.dipper.hc3.jsonl",
+            "bytes": 2953682,
+            "sha256": "4072fcce3073dca506595a7177ac2641e9ec9c8538a98d8c1b9178ea18b819b0"
+          },
+          "statistics": {
+            "input_records": 1920,
+            "empty_records": 1,
+            "skipped_records": 1,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 1919,
+            "labels": {
+              "0": 960,
+              "1": 959
+            },
+            "source_groups": 960
+          }
+        },
+        {
+          "name": "Min-P",
+          "path": "test_data/dataset.minp.mistral.hc3.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.minp.mistral.hc3.jsonl",
+            "bytes": 1855576,
+            "sha256": "7cb2d1fdddbaef888c856c9c168187ea0518fcdfac055efe390e071f1d5e3135"
+          },
+          "statistics": {
+            "input_records": 1920,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 1920,
+            "labels": {
+              "0": 960,
+              "1": 960
+            },
+            "source_groups": 960
+          }
+        },
+        {
+          "name": "TempParaphraser",
+          "path": "test_data/dataset.tp.hc3.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.tp.hc3.jsonl",
+            "bytes": 1730176,
+            "sha256": "efe8fb6a490b5d65486ff333cec0b54b539925c97cfb93e1b45d0b33047bf639"
+          },
+          "statistics": {
+            "input_records": 1920,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 1920,
+            "labels": {
+              "0": 960,
+              "1": 960
+            },
+            "source_groups": 960
+          }
+        },
+        {
+          "name": "Recursive K=5",
+          "path": "test_data/dataset.recursive_k5.hc3.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.recursive_k5.hc3.jsonl",
+            "bytes": 3472709,
+            "sha256": "7a7eedce7475eef1819ff416a6eb7ef7daec4d1503ef0daebe06b17b05ae15de"
+          },
+          "statistics": {
+            "input_records": 1920,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 1920,
+            "labels": {
+              "0": 960,
+              "1": 960
+            },
+            "source_groups": 960
+          }
+        },
+        {
+          "name": "squad/No Attack",
+          "path": "test_data/dataset.no_attack.squad.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.no_attack.squad.jsonl",
+            "bytes": 374054,
+            "sha256": "3742b7e826cfd4dd12cee8d5c851cf104fc28fe75be71b0e0eebf1eaa7df6851"
+          },
+          "statistics": {
+            "input_records": 400,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 400,
+            "labels": {
+              "0": 200,
+              "1": 200
+            },
+            "source_groups": 200
+          }
+        },
+        {
+          "name": "squad/DIPPER",
+          "path": "test_data/dataset.dipper.squad.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.dipper.squad.jsonl",
+            "bytes": 611468,
+            "sha256": "43ae924b5e3298aa9f2ec63b5027d78cd43768f850d516662c00cf18497b538a"
+          },
+          "statistics": {
+            "input_records": 400,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 400,
+            "labels": {
+              "0": 200,
+              "1": 200
+            },
+            "source_groups": 200
+          }
+        },
+        {
+          "name": "squad/Min-P",
+          "path": "test_data/dataset.minp.mistral.squad.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.minp.mistral.squad.jsonl",
+            "bytes": 401068,
+            "sha256": "c656fc24b63512ead2a605d76ee4fe3399fab06793819ab10971a46900d743bd"
+          },
+          "statistics": {
+            "input_records": 400,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 400,
+            "labels": {
+              "0": 200,
+              "1": 200
+            },
+            "source_groups": 200
+          }
+        },
+        {
+          "name": "squad/TempParaphraser",
+          "path": "test_data/dataset.tp.squad.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.tp.squad.jsonl",
+            "bytes": 361900,
+            "sha256": "e6246383e8111ba99aa29d10242f62808a8474aa023af0679fcfe1013a90fdb3"
+          },
+          "statistics": {
+            "input_records": 400,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 400,
+            "labels": {
+              "0": 200,
+              "1": 200
+            },
+            "source_groups": 200
+          }
+        },
+        {
+          "name": "squad/Recursive K=5",
+          "path": "test_data/dataset.recursive_k5.squad.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.recursive_k5.squad.jsonl",
+            "bytes": 742944,
+            "sha256": "32eced12065190a6a5a841fbb7105409f29db69129cdbd23ee5b39f3fb08575d"
+          },
+          "statistics": {
+            "input_records": 400,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 400,
+            "labels": {
+              "0": 200,
+              "1": 200
+            },
+            "source_groups": 200
+          }
+        },
+        {
+          "name": "xsum/No Attack",
+          "path": "test_data/dataset.no_attack.xsum.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.no_attack.xsum.jsonl",
+            "bytes": 356059,
+            "sha256": "fa49d3530c67bd3b2a08af591cec72100a789ab85733a25e2fb4adb8beca7585"
+          },
+          "statistics": {
+            "input_records": 300,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 300,
+            "labels": {
+              "0": 150,
+              "1": 150
+            },
+            "source_groups": 150
+          }
+        },
+        {
+          "name": "xsum/DIPPER",
+          "path": "test_data/dataset.dipper.xsum.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.dipper.xsum.jsonl",
+            "bytes": 582981,
+            "sha256": "355fae3817549fef4a71d2d3c8640e45f050d73a3ef6f13ab812c702acc6b93f"
+          },
+          "statistics": {
+            "input_records": 300,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 300,
+            "labels": {
+              "0": 150,
+              "1": 150
+            },
+            "source_groups": 150
+          }
+        },
+        {
+          "name": "xsum/Min-P",
+          "path": "test_data/dataset.minp.mistral.xsum.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.minp.mistral.xsum.jsonl",
+            "bytes": 321519,
+            "sha256": "e384205284af68b7d00bdcbeb2b3752c6e8d7e28de0fc126e035a37dcdc5e606"
+          },
+          "statistics": {
+            "input_records": 300,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 300,
+            "labels": {
+              "0": 150,
+              "1": 150
+            },
+            "source_groups": 150
+          }
+        },
+        {
+          "name": "xsum/TempParaphraser",
+          "path": "test_data/dataset.tp.xsum.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.tp.xsum.jsonl",
+            "bytes": 339496,
+            "sha256": "9ed2ba4394ebf8aa381b0a04c04ebb28cb30d15e650deaeefafa9fa2efd88a41"
+          },
+          "statistics": {
+            "input_records": 300,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 300,
+            "labels": {
+              "0": 150,
+              "1": 150
+            },
+            "source_groups": 150
+          }
+        },
+        {
+          "name": "xsum/Recursive K=5",
+          "path": "test_data/dataset.recursive_k5.xsum.jsonl",
+          "exists": true,
+          "file": {
+            "name": "dataset.recursive_k5.xsum.jsonl",
+            "bytes": 762313,
+            "sha256": "00d3d03d555d630cea4ab4c206fdbcadef04f763f0249539850e7b65e662b726"
+          },
+          "statistics": {
+            "input_records": 300,
+            "empty_records": 0,
+            "skipped_records": 0,
+            "blank_lines": 0,
+            "empty_text_policy": "skip",
+            "loaded_records": 300,
+            "labels": {
+              "0": 150,
+              "1": 150
+            },
+            "source_groups": 150
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "path": "saved_models_epoch50/model_lambda_0.0_best.pt",
+          "exists": true
+        },
+        {
+          "path": "saved_models_epoch50/best_defense_model_FINAL_TESTED.pt",
+          "exists": true
+        }
+      ]
+    }
+  ],
+  "source_comparison": [
+    {
+      "source": "generate_no_attack.py",
+      "expected_sha256": "065dc881ef215754b62b86416b530f8ffdc3d72d4854c575b01c4c6680c290bd",
+      "observed": {
+        "name": "generate_no_attack.py",
+        "bytes": 2749,
+        "sha256": "065dc881ef215754b62b86416b530f8ffdc3d72d4854c575b01c4c6680c290bd"
+      },
+      "matches": true
+    },
+    {
+      "source": "generate_minp_attack.py",
+      "expected_sha256": "37f0e8cd20b40f402bc8fc1eed1eba4490a16f9364cb53114e950fce2ebca387",
+      "observed": {
+        "name": "generate_minp_attack.py",
+        "bytes": 5134,
+        "sha256": "37f0e8cd20b40f402bc8fc1eed1eba4490a16f9364cb53114e950fce2ebca387"
+      },
+      "matches": true
+    },
+    {
+      "source": "generate_synonym_attack.py",
+      "expected_sha256": "98de939e6f541f54f905a06886249a9822285302bc0b8ba15e99e7575721f5eb",
+      "observed": {
+        "name": "generate_synonym_attack.py",
+        "bytes": 6555,
+        "sha256": "98de939e6f541f54f905a06886249a9822285302bc0b8ba15e99e7575721f5eb"
+      },
+      "matches": true
+    },
+    {
+      "source": "ablation_tp.py",
+      "expected_sha256": "5b6e082188556ca1c8b49e157b2c53e3a0f4fdf21fca8001c912ba7f1d82d07b",
+      "observed": {
+        "name": "ablation_tp.py",
+        "bytes": 16713,
+        "sha256": "5b6e082188556ca1c8b49e157b2c53e3a0f4fdf21fca8001c912ba7f1d82d07b"
+      },
+      "matches": true
+    },
+    {
+      "source": "eval/evaluate_defenses.py",
+      "expected_sha256": "5360864060f7da98d9ab9429282907d160ea3896c4cdafbca992cc40716a62b5",
+      "observed": {
+        "name": "evaluate_defenses.py",
+        "bytes": 7829,
+        "sha256": "5360864060f7da98d9ab9429282907d160ea3896c4cdafbca992cc40716a62b5"
+      },
+      "matches": true
+    },
+    {
+      "source": "eval/train_random_temp.py",
+      "expected_sha256": "e0b72fd0add529571aa41af2bf67918c3aac014fcd3561d6f9c889ba4ef39448",
+      "observed": {
+        "name": "train_random_temp.py",
+        "bytes": 6168,
+        "sha256": "e0b72fd0add529571aa41af2bf67918c3aac014fcd3561d6f9c889ba4ef39448"
+      },
+      "matches": true
+    },
+    {
+      "source": "entropy_and_variance/analyze_entropy_generic.py",
+      "expected_sha256": "538a34d14b5422999ccde12e4baac90d463d147ab861179a6a62b2a0590b12ed",
+      "observed": {
+        "name": "analyze_entropy_generic.py",
+        "bytes": 7331,
+        "sha256": "538a34d14b5422999ccde12e4baac90d463d147ab861179a6a62b2a0590b12ed"
+      },
+      "matches": true
+    },
+    {
+      "source": "generate_full_dataset.py",
+      "expected_sha256": "e740f94105ce6391ba38ead5bd8a2ccb4f6df6581a869657839566c0bea8e659",
+      "observed": {
+        "name": "generate_full_dataset.py",
+        "bytes": 5842,
+        "sha256": "e740f94105ce6391ba38ead5bd8a2ccb4f6df6581a869657839566c0bea8e659"
+      },
+      "matches": true
+    }
+  ],
+  "tests": [
+    {
+      "command": [
+        "/root/miniconda3/envs/acl_sprint/bin/python",
+        "scripts/run.py",
+        "smoke"
+      ],
+      "returncode": 0,
+      "output_sha256": "a152cac8706e59d20feacb33ba0636605854e28b28051be0bfbf0e2aa34c204b",
+      "scope": "tiny CPU smoke"
+    },
+    {
+      "command": [
+        "/root/miniconda3/envs/acl_sprint/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "returncode": 0,
+      "output_sha256": "18263f0be6a1b5ffbb48a813bd729c1b475276d3eb7165b62507f3803748d5e9",
+      "scope": "16 CPU unit/integration tests"
+    }
+  ],
+  "status": "Measured AutoDL preflight; not paper-table reproduction"
+}

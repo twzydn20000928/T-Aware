@@ -4,9 +4,9 @@
 
 T-Aware shares a RoBERTa encoder between source classification and an auxiliary generation-temperature regressor. Human texts contribute only classification loss. Inference needs text only.
 
-This repository organizes the existing research implementation for the ICASSP 2027 manuscript. It includes checkpoint-compatible training and evaluation, dataset checks, generation, baseline adapters, variance analysis, and reproduction notes. It does **not** bundle datasets, model weights, private manuscript/review files, or credentials.
+This repository organizes the existing research implementation associated with the EMNLP 2026 submission and ICASSP 2027 draft. When a manuscript conflicts with the experiments, the owner's AutoDL source, assets and logs take precedence. It includes checkpoint-compatible training and evaluation, dataset checks, generation, baseline adapters, variance analysis, and reproduction notes. It does **not** bundle datasets, model weights, private manuscript/review files, or credentials.
 
-**Release status:** CPU tests and compatibility with the available historical checkpoint are recorded in [validation](docs/validation.md). AutoDL verification and reproduction of all paper tables are pending. Do not treat example configurations as proof that the published numbers have been reproduced. The manuscript and available training code differ in several settings; see [paper alignment](docs/paper_alignment.md).
+**Release status:** Local and AutoDL CPU tests and strict compatibility with the actual historical checkpoint have passed; evidence is recorded in [validation](docs/validation.md). Reproduction of all paper tables remains incomplete. Manuscript claims about normalized targets, batch size, epochs and warmup disagree with the server implementation; see [paper alignment](docs/paper_alignment.md).
 
 ## Quick start
 
@@ -33,7 +33,7 @@ python scripts/run.py benchmark --config configs/evaluate_main.json --data-root 
 python scripts/run.py benchmark --config configs/evaluate_cross_generator.json --data-root /path/to/original --device cpu --output outputs/generator-transfer.json
 ```
 
-No-card AutoDL is sufficient for environment/data checks and the tiny CPU tests. Full-model CPU evaluation can be slow; generation and training should use an appropriate GPU environment. The original `saved_models_epoch50/best_defense_model_FINAL_TESTED.pt` and `model_lambda_10.0_best.pt` have identical SHA-256 checksums in the inspected local copy. See [checkpoints](docs/checkpoints.md).
+No-card AutoDL is sufficient for environment/data checks and tiny CPU tests. The inspected instance has a **2 GiB container memory limit** despite reporting much more host memory. Run checks serially and use a small inference batch. Modern PyTorch loads zip-format checkpoints through memory mapping to avoid a duplicate resident weight copy. Generation and training need an appropriate GPU environment. The original `saved_models_epoch50/best_defense_model_FINAL_TESTED.pt` and `model_lambda_10.0_best.pt` have identical SHA-256 checksums both locally and on AutoDL. See [checkpoints](docs/checkpoints.md).
 
 `evaluate_main.json` separates HC3/ChatGPT source text from XSum/SQuAD conditions. `evaluate_cross_generator.json` separately evaluates Llama-3, Mistral and Gemma-2. Different populations and subset sizes must not be merged into one reported experiment.
 
@@ -51,7 +51,7 @@ python scripts/run.py evaluate --data /path/to/original/test_data/dataset.tp.hc3
 
 The example checkpoint path assumes lambda=10 is the desired run. Use the actual winner from `selection.json`; do not choose it using test scores.
 
-`train_paper_declared.json` is a **new** normalized-target profile implementing manuscript settings, not a claim about existing checkpoint provenance. It defaults to rejecting empty data. `train_random_control.json` resamples random AI temperature targets on access, matching the historical control's behavior. See [reproduction](docs/reproduction.md).
+`train_observed_legacy.json` follows the verified server script defaults: raw temperature, batch size 128, up to 50 epochs, patience 15 and no warmup. `train_hypothetical_normalized.json` is an optional **new experiment** based on unsupported manuscript settings; it is not a historical reproduction profile. It defaults to rejecting empty data. `train_random_control.json` follows the older five-epoch random-target script; a separate server script uses up to 50 epochs and validation selection. Neither establishes provenance of the draft's 51.3% result. See [reproduction](docs/reproduction.md).
 
 ## Analysis and baselines
 
@@ -72,7 +72,15 @@ From an existing AutoDL terminal, run:
 python scripts/server_check.py --output /root/t-aware-preflight.json
 ```
 
-The script searches common AutoDL project locations; if more than one matches, provide `--asset-root /path/to/original`. It records environment versions, input counts, checkpoint checksums and CPU test results. It does not install packages, edit source assets, start training, or read environment secrets. An existing output is never overwritten.
+The script searches common AutoDL project locations; if more than one matches, provide `--asset-root /path/to/original`. It records environment versions, input counts, checkpoint checksums, all configured evaluation populations, original-source hash comparisons and CPU test results. It does not install packages, edit source assets, start training, or read environment secrets. An existing output is never overwritten. On the inspected server, use `/root/miniconda3/envs/acl_sprint/bin/python`; a noninteractive SSH shell has no `python` command on PATH.
+
+For a separate offline comparison with the trusted historical forward/loss implementation:
+
+```bash
+OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 python scripts/verify_checkpoint.py --checkpoint /path/to/original/saved_models_epoch50/best_defense_model_FINAL_TESTED.pt --model-config /path/to/local/roberta-base-snapshot --legacy-source /path/to/original/ablation_tp.py --output outputs/compatibility.json
+```
+
+Use the cached RoBERTa snapshot directory for both `--model-config` and `--tokenizer` when running `evaluate` offline. These checks have passed with Transformers 4.31.0 locally and 5.13.1 on AutoDL; optional generation and baseline adapters have not all been validated on Transformers 5.
 
 ## Data and results
 

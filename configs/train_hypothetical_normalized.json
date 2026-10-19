@@ -1,6 +1,6 @@
 {
-  "name": "paper-declared-normalized-temperature",
-  "status": "NEW training profile from manuscript settings; not the provenance of existing weights",
+  "name": "hypothetical-normalized-temperature-NOT-HISTORICAL",
+  "status": "Optional NEW experiment only. Manuscript settings conflict with AutoDL source; do not use for historical reproduction.",
   "base_model": "roberta-base",
   "train_file": "dataset/dataset.llama3.train.jsonl",
   "val_standard": "dataset/dataset.llama3.val.clean.jsonl",

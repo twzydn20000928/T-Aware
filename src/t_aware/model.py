@@ -43,10 +43,22 @@ def load_checkpoint(path, config_path, lambda_reg=1.0):
     kwargs = {"map_location": "cpu"}
     if "weights_only" in inspect.signature(torch.load).parameters:
         kwargs["weights_only"] = True
+    # Memory-map modern zip checkpoints and assign their tensors directly. This
+    # avoids keeping a second resident 500 MB copy on small CPU-only instances.
+    assign = "assign" in inspect.signature(model.load_state_dict).parameters
+    if assign and "mmap" in inspect.signature(torch.load).parameters:
+        kwargs["mmap"] = True
     # On old PyTorch, only load trusted, locally owned historical checkpoints.
-    state = torch.load(path, **kwargs)
+    try:
+        state = torch.load(path, **kwargs)
+    except RuntimeError as error:
+        if kwargs.get("mmap") and "mmap can only be used" in str(error):
+            kwargs.pop("mmap")
+            state = torch.load(path, **kwargs)
+        else:
+            raise
     if "state_dict" in state:
         state = state["state_dict"]
     state = {key.removeprefix("module."): value for key, value in state.items()}
-    model.load_state_dict(state, strict=True)
+    model.load_state_dict(state, strict=True, **({"assign": True} if assign else {}))
     return model

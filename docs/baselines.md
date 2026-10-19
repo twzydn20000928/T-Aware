@@ -38,3 +38,5 @@ python scripts/run.py baseline --method llm --model gpt-4o-mini --data /path/to/
 ```
 
 Only an exact `0` or `1` response is accepted. Connection failures and invalid responses are retried a bounded number of times and remain missing if unsuccessful. The output records coverage, failed count and metrics on valid decisions; the process exits nonzero if any requests fail. Historical API failures cannot be repaired by copying old aggregate scores into this output.
+
+The AutoDL historical judge returned Human for API exceptions and malformed provider responses. Its near-zero AI recall may therefore include failures. Its F1 formula is AI-positive F1, even where rebuttal tables call it macro. Treat the historical aggregate as requiring a new coverage-aware evaluation; the current release does not claim those scores measure valid decisions for every request.

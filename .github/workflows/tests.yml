@@ -3,6 +3,9 @@ on: [push, pull_request]
 jobs:
   tests:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        transformers: ['4.31.0', '5.13.1']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -10,6 +13,6 @@ jobs:
           python-version: '3.11'
           cache: pip
       - run: pip install torch --index-url https://download.pytorch.org/whl/cpu
-      - run: pip install -e .
+      - run: pip install -e . 'transformers==${{ matrix.transformers }}'
       - run: python scripts/run.py smoke
       - run: python -m unittest discover -s tests -v

@@ -1,0 +1,39 @@
+{
+  "status": "passed",
+  "environment": {
+    "python": "3.10.19",
+    "platform": "Linux-5.15.0-78-generic-x86_64-with-glibc2.35",
+    "packages": {
+      "torch": "2.9.1",
+      "transformers": "5.13.1",
+      "numpy": "2.2.6",
+      "tqdm": "4.67.1",
+      "scikit-learn": "1.7.2",
+      "huggingface-hub": "1.23.0"
+    },
+    "recorded_at_utc": "2026-10-19T13:49:07.212238+00:00"
+  },
+  "checkpoint": {
+    "name": "best_defense_model_FINAL_TESTED.pt",
+    "bytes": 498678888,
+    "sha256": "db8ec3ea319a5390b4646e5f0674f0f7a936aa91b9ceaea63e17dd666cfd5b0a"
+  },
+  "legacy_source": {
+    "name": "ablation_tp.py",
+    "bytes": 16713,
+    "sha256": "5b6e082188556ca1c8b49e157b2c53e3a0f4fdf21fca8001c912ba7f1d82d07b"
+  },
+  "model_config": {
+    "name": "config.json",
+    "bytes": 481,
+    "sha256": "ef0185e2aae6e06c5f105a285006952c340e20c7dbf43c86ec82601b13fc45e9"
+  },
+  "strict_load": true,
+  "parameters": 124647939,
+  "differences": {
+    "logits_max_abs": 0.0,
+    "temperature_max_abs": 0.0,
+    "loss_abs": 0.0
+  },
+  "scope": "Synthetic CPU inputs; verifies model/loss compatibility, not paper accuracy or training provenance"
+}
