@@ -102,7 +102,7 @@ def main():
             if remote[name].get('digest'):
                 assert remote[name]['digest'] == 'sha256:' + expected[name]['sha256'], name
         gh('release', 'edit', tag, '--repo', repository, '--draft=false', '--latest')
-        print('PUBLISHED', published['html_url'], flush=True)
+        print('PUBLISHED', f'https://github.com/{repository}/releases/tag/{tag}', flush=True)
 
 
 if __name__ == '__main__':

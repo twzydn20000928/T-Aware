@@ -1,8 +1,5 @@
 name: Publish research assets
 on:
-  push:
-    branches: [main]
-    paths: ['.github/release-source.json']
   workflow_dispatch:
 permissions:
   contents: write
